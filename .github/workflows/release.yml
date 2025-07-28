@@ -12,7 +12,7 @@ jobs:
       matrix:
         configuration: [Release]
         os: [win]
-        arch: [x86, x64]
+        arch: [x86, x64, arm64]
 
     runs-on: windows-latest
 
