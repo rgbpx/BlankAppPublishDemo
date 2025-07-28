@@ -25,23 +25,22 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
+    - name: Install .NET Core Runtime
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
 
-    # Dotnet publish
-    - name: Dotnet publish
+    - name: Run dotnet publish
       run: cd ${{ env.Project_Name }} && dotnet publish ${{ env.Project_Name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
 
-    # Upload the app
     - name: Upload app
       uses: actions/upload-artifact@v4
       with:
-        name: Upload app
-        path: bin/Release/net8.0-windows10.0.19041.0/${{ matrix.os }}-${{ matrix.arch }}/publish
+        name: App-net8.0-windows10.0.19041.0-${{ matrix.os }}-${{ matrix.arch }}
+        path: ${{ env.Project_Name }}/bin/Release/net8.0-windows10.0.19041.0/${{ matrix.os }}-${{ matrix.arch }}/publish
+        if-no-files-found: error
+        compression-level: 9
+        overwrite: true
