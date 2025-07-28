@@ -5,6 +5,7 @@ name: Build and Publish WinUI 3 App
 
 permissions:
   id-token: write
+  contents: write
   attestations: write
 
 on:
