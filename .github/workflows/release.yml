@@ -36,11 +36,11 @@ jobs:
     - name: Run dotnet publish
       run: cd ${{ env.Project_Name }} && dotnet publish ${{ env.Project_Name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
 
-    - name: Upload app
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: App-net8.0-windows10.0.19041.0-${{ matrix.os }}-${{ matrix.arch }}
-        path: ${{ env.Project_Name }}/bin/Release/net8.0-windows10.0.19041.0/${{ matrix.os }}-${{ matrix.arch }}/publish
+        path: ${{ github.workspace }}/${{ env.Project_Name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.Project_Name }}.exe
         if-no-files-found: error
         compression-level: 9
         overwrite: true
