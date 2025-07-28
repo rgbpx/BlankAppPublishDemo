@@ -13,7 +13,6 @@ jobs:
         configuration: [Release]
         os: [win]
         arch: [x86, x64]
-        dotnet: ['8.0.x']
 
     runs-on: windows-latest
 
@@ -29,7 +28,7 @@ jobs:
     - name: Install .NET Core SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: '8.0.x'
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
