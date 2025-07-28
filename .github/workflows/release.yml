@@ -1,0 +1,47 @@
+# This workflow will build and publish a WinUI 3 unpackaged desktop application
+# built on .NET.
+
+name: WinUI 3 app publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+        os: [win]
+        arch: [x86, x64]
+
+    runs-on: windows-latest
+
+    env:
+      Project_Name: BlankAppPublishDemo
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    # Dotnet publish
+    - name: Dotnet publish
+      run: dotnet publish ${{ env.Project_Name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
+
+    # Upload the app
+    - name: Upload app
+      uses: actions/upload-artifact@v2
+      with:
+        name: Upload app
+        path: ${{ env.Project_Name }}\\bin
