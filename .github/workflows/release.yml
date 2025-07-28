@@ -22,16 +22,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install .NET Core SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+    # - name: Install .NET Core SDK
+    #   uses: actions/setup-dotnet@v4
+    #   with:
+    #     dotnet-version: '8.0.x'
 
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      run: nuget restore ${{ env.project_name }}.sln
+    # - name: Restore NuGet packages
+    #   run: nuget restore ${{ env.project_name }}.sln
 
     - name: Run dotnet publish
       run: |
@@ -56,16 +56,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install .NET Core SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+    # - name: Install .NET Core SDK
+    #   uses: actions/setup-dotnet@v4
+    #   with:
+    #     dotnet-version: '8.0.x'
 
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      run: nuget restore ${{ env.project_name }}.sln
+    # - name: Restore NuGet packages
+    #   run: nuget restore ${{ env.project_name }}.sln
 
     - name: Run dotnet publish
       run: |
@@ -78,34 +78,34 @@ jobs:
 
 
   # Only for public repositories (auto cancelled in private repositories)
-  aot-arm64:
-    strategy:
-      matrix:
-        os: [win]
-        arch: [arm64]
-        profile: [aot]
-        optimization: ['Speed', 'Size']
-    runs-on: windows-11-arm
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+  # aot-arm64:
+  #   strategy:
+  #     matrix:
+  #       os: [win]
+  #       arch: [arm64]
+  #       profile: [aot]
+  #       optimization: ['Speed', 'Size']
+  #   runs-on: windows-11-arm
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
 
-    - name: Install .NET Core SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+  #   - name: Install .NET Core SDK
+  #     uses: actions/setup-dotnet@v4
+  #     with:
+  #       dotnet-version: '8.0.x'
 
-    - name: Add MSBUILD to PATH
-      uses: microsoft/setup-msbuild@v2
+  #   - name: Add MSBUILD to PATH
+  #     uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      run: nuget restore ${{ env.project_name }}.sln
+  #   - name: Restore NuGet packages
+  #     run: nuget restore ${{ env.project_name }}.sln
 
-    - name: Run dotnet publish
-      run: |
-        cd ${{ env.project_name }}
-        dotnet publish ${{ env.project_name }}.csproj `
-          /p:PublishProfile=${{ matrix.profile }} `
-          /p:PlatformTarget=${{ matrix.arch }} `
-          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-          /p:OptimizationPreference=${{ matrix.optimization }}
+  #   - name: Run dotnet publish
+  #     run: |
+  #       cd ${{ env.project_name }}
+  #       dotnet publish ${{ env.project_name }}.csproj `
+  #         /p:PublishProfile=${{ matrix.profile }} `
+  #         /p:PlatformTarget=${{ matrix.arch }} `
+  #         /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+  #         /p:OptimizationPreference=${{ matrix.optimization }}
