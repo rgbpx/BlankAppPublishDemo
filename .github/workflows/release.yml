@@ -49,7 +49,7 @@ jobs:
         dotnet publish ${{ env.project_name }}.csproj `
           /p:Configuration=${{ matrix.configuration }} `
           /p:PlatformTarget=${{ matrix.arch }} `
-          /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && '-aot-' + matrix.aot || '' }}
+          /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && format('-aot-{0}', matrix.aot) || '' }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
