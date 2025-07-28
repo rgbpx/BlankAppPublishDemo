@@ -6,58 +6,112 @@ name: Build and Publish WinUI 3 App
 on:
   workflow_dispatch:
 
+env:
+  project_name: BlankAppPublishDemo
+
 jobs:
-  release:
+  jit:
     strategy:
       matrix:
-        configuration: [Release]
         os: [win]
         arch: [x86, x64, arm64]
-        aot: ['', 'speed', 'size']
-        # profiles:
-        #   - win-x86
-        #   - win-x64
-        #   - win-x64-aot-speed
-        #   - win-x64-aot-size
-        #   - win-arm64
-        #   - win-arm64-aot-speed
-        #   - win-arm64-aot-size
-
+        single-file: [false, true]
+        profile: [jit]
+        configuration: [Release]
     runs-on: windows-latest
-
-    env:
-      project_name: BlankAppPublishDemo
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Install .NET Core SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Add msbuild to PATH
+    - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
 
+    - name: Restore NuGet packages
+      run: nuget restore ${{ env.project_name }}.sln
+
     - name: Run dotnet publish
-      # run: cd ${{ env.project_name }} && dotnet publish ${{ env.project_name }}.csproj /p:Configuration=${{ env.configuration }} /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
+          /p:PublishProfile=${{ matrix.profile }}
           /p:Configuration=${{ matrix.configuration }} `
           /p:PlatformTarget=${{ matrix.arch }} `
-          /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && format('-aot-{0}', matrix.aot) || '' }}
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:PublishSingleFile=${{ matrix.single-file }}
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
+
+
+  aot-x64:
+    strategy:
+      matrix:
+        runner: [windows-latest]
+        os: [win]
+        arch: [x64]
+        optimization: ['Speed', 'Size']
+        profile: [aot]
+        configuration: [Release]
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install .NET Core SDK
+      uses: actions/setup-dotnet@v4
       with:
-        # name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}
-        name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && format('-aot-{0}', matrix.aot) || '' }}
-        # path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.project_name }}.exe
-        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && format('-aot-{0}', matrix.aot) || '' }}
-        if-no-files-found: error
-        compression-level: 9
-        overwrite: true
+        dotnet-version: '8.0.x'
+
+    - name: Add MSBUILD to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore ${{ env.project_name }}.sln
+
+    - name: Run dotnet publish
+      run: |
+        cd ${{ env.project_name }}
+        dotnet publish ${{ env.project_name }}.csproj `
+          /p:PublishProfile=${{ matrix.profile }}
+          /p:Configuration=${{ matrix.configuration }} `
+          /p:PlatformTarget=${{ matrix.arch }} `
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:OptimizationPreference=${{ matrix.optimization }}
+
+  aot-arm64:
+    strategy:
+      matrix:
+        runner: [windows-11-arm]
+        os: [win]
+        arch: [arm64]
+        optimization: ['Speed', 'Size']
+        profile: [aot]
+        configuration: [Release]
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Add MSBUILD to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore ${{ env.project_name }}.sln
+
+    - name: Run dotnet publish
+      run: |
+        cd ${{ env.project_name }}
+        dotnet publish ${{ env.project_name }}.csproj `
+          /p:PublishProfile=${{ matrix.profile }}
+          /p:Configuration=${{ matrix.configuration }} `
+          /p:PlatformTarget=${{ matrix.arch }} `
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:OptimizationPreference=${{ matrix.optimization }}
