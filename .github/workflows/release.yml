@@ -3,6 +3,10 @@
 
 name: Build and Publish WinUI 3 App
 
+permissions:
+  id-token: write
+  attestations: write
+
 on:
   workflow_dispatch:
 
@@ -36,7 +40,13 @@ jobs:
     - name: Run dotnet publish
       run: cd ${{ env.project_name }} && dotnet publish ${{ env.project_name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
 
-    - name: Upload
+    - name: Generate build provenance attestation
+      uses: actions/attest-build-provenance@v2
+      with:
+        artifact-path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.project_name }}.exe
+        artifact-checksum-algorithm: sha256
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}
