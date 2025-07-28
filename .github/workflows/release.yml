@@ -13,7 +13,7 @@ jobs:
         configuration: [Release]
         os: [win]
         arch: [x86, x64]
-        dotnet: [8.0.412]
+        dotnet: ['8.0.x']
 
     runs-on: windows-latest
 
@@ -40,7 +40,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.project_name }}-net${{ matrix.dotnet }}-${{ matrix.os }}-${{ matrix.arch }}
+        name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}
         path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.project_name }}.exe
         if-no-files-found: error
         compression-level: 9
