@@ -1,13 +1,20 @@
 name: Build and Publish WinUI 3 App
 
+# on:
+#   workflow_dispatch:
+
+# Run on every push of a version tag
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
 
 env:
   project_name: BlankAppPublishDemo
 
 jobs:
-  jit:
+  build-jit:
+    name: Build JIT artifacts 
     strategy:
       matrix:
         os: [win]
@@ -41,7 +48,8 @@ jobs:
         overwrite: true
 
 
-  aot:
+  build-aot:
+    name: Build AOT artifacts
     strategy:
       matrix:
         os: [win]
@@ -73,3 +81,32 @@ jobs:
         if-no-files-found: error
         compression-level: 9
         overwrite: true
+
+  
+  release-github:
+    name: Publish GitHub release
+    needs: [build-jit, build-aot]
+    runs-on: windows-latest
+
+    steps:
+      - name: Download all JIT artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Use a wildcard to download all artifacts uploaded by the jit job
+          name: |
+            ${{ env.project_name }}-win-x86-jit*
+            ${{ env.project_name }}-win-x64-jit*
+            ${{ env.project_name }}-win-arm64-jit*
+          path: ./artifacts/jit
+          
+      - name: Download all AOT artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: |
+            ${{ env.project_name }}-win-x64-aot-speed
+            ${{ env.project_name }}-win-x64-aot-size
+          path: ./artifacts/aot
+
+      - name: List all downloaded artifacts
+        run: |
+          Get-ChildItem -Recurse -Path ./artifacts
