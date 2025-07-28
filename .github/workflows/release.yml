@@ -13,6 +13,15 @@ jobs:
         configuration: [Release]
         os: [win]
         arch: [x86, x64, arm64]
+        aot: ['', 'speed', 'size']
+        # profiles:
+        #   - win-x86
+        #   - win-x64
+        #   - win-x64-aot-speed
+        #   - win-x64-aot-size
+        #   - win-arm64
+        #   - win-arm64-aot-speed
+        #   - win-arm64-aot-size
 
     runs-on: windows-latest
 
@@ -34,7 +43,13 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Run dotnet publish
-      run: cd ${{ env.project_name }} && dotnet publish ${{ env.project_name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
+      # run: cd ${{ env.project_name }} && dotnet publish ${{ env.project_name }}.csproj /p:Configuration=${{ env.configuration }} /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
+      run: |
+        cd ${{ env.project_name }}
+        dotnet publish ${{ env.project_name }}.csproj `
+          /p:Configuration=${{ matrix.configuration }} `
+          /p:PlatformTarget=${{ matrix.arch }} `
+          /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}${{ (matrix.arch == 'x64' || matrix.arch == 'arm64') && matrix.aot != '' && '-aot-' + matrix.aot || '' }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
