@@ -1,6 +1,3 @@
-# This workflow will build and publish a WinUI 3 unpackaged desktop application
-# built on .NET.
-
 name: Build and Publish WinUI 3 App
 
 on:
@@ -22,16 +19,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # - name: Install .NET Core SDK
-    #   uses: actions/setup-dotnet@v4
-    #   with:
-    #     dotnet-version: '8.0.x'
-
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
-
-    # - name: Restore NuGet packages
-    #   run: nuget restore ${{ env.project_name }}.sln
 
     - name: Run dotnet publish
       run: |
@@ -42,30 +31,30 @@ jobs:
           /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:PublishSingleFile=${{ matrix.single-file }}
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}
+        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}
+        if-no-files-found: error
+        compression-level: 9
+        overwrite: true
 
-  #aot-x64:
+
   aot:
     strategy:
       matrix:
         os: [win]
         arch: [x64]
         profile: [aot]
-        optimization: ['Speed', 'Size']
+        optimization: ['speed', 'size']
     runs-on: windows-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # - name: Install .NET Core SDK
-    #   uses: actions/setup-dotnet@v4
-    #   with:
-    #     dotnet-version: '8.0.x'
-
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
-
-    # - name: Restore NuGet packages
-    #   run: nuget restore ${{ env.project_name }}.sln
 
     - name: Run dotnet publish
       run: |
@@ -76,36 +65,11 @@ jobs:
           /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:OptimizationPreference=${{ matrix.optimization }}
 
-
-  # Only for public repositories (auto cancelled in private repositories)
-  # aot-arm64:
-  #   strategy:
-  #     matrix:
-  #       os: [win]
-  #       arch: [arm64]
-  #       profile: [aot]
-  #       optimization: ['Speed', 'Size']
-  #   runs-on: windows-11-arm
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v4
-
-  #   - name: Install .NET Core SDK
-  #     uses: actions/setup-dotnet@v4
-  #     with:
-  #       dotnet-version: '8.0.x'
-
-  #   - name: Add MSBUILD to PATH
-  #     uses: microsoft/setup-msbuild@v2
-
-  #   - name: Restore NuGet packages
-  #     run: nuget restore ${{ env.project_name }}.sln
-
-  #   - name: Run dotnet publish
-  #     run: |
-  #       cd ${{ env.project_name }}
-  #       dotnet publish ${{ env.project_name }}.csproj `
-  #         /p:PublishProfile=${{ matrix.profile }} `
-  #         /p:PlatformTarget=${{ matrix.arch }} `
-  #         /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-  #         /p:OptimizationPreference=${{ matrix.optimization }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}
+        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}
+        if-no-files-found: error
+        compression-level: 9
+        overwrite: true
