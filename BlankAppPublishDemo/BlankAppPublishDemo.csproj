@@ -12,6 +12,7 @@
     <Nullable>enable</Nullable>
     <!-- Hide WebView trimming warning in the builds -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    <Configuration>Release</Configuration>
   </PropertyGroup>
 
   <ItemGroup>

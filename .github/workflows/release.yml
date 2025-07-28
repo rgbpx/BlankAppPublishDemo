@@ -15,9 +15,8 @@ jobs:
       matrix:
         os: [win]
         arch: [x86, x64, arm64]
-        single-file: [false, true]
         profile: [jit]
-        configuration: [Release]
+        single-file: [false, true]
     runs-on: windows-latest
     steps:
     - name: Checkout repository
@@ -38,24 +37,21 @@ jobs:
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
-          /p:PublishProfile=${{ matrix.profile }}
-          /p:Configuration=${{ matrix.configuration }} `
+          /p:PublishProfile=${{ matrix.profile }} `
           /p:PlatformTarget=${{ matrix.arch }} `
-          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:PublishSingleFile=${{ matrix.single-file }}
 
 
-
-  aot-x64:
+  #aot-x64:
+  aot:
     strategy:
       matrix:
-        runner: [windows-latest]
         os: [win]
         arch: [x64]
-        optimization: ['Speed', 'Size']
         profile: [aot]
-        configuration: [Release]
-    runs-on: ${{ matrix.runner }}
+        optimization: ['Speed', 'Size']
+    runs-on: windows-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -75,22 +71,21 @@ jobs:
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
-          /p:PublishProfile=${{ matrix.profile }}
-          /p:Configuration=${{ matrix.configuration }} `
+          /p:PublishProfile=${{ matrix.profile }} `
           /p:PlatformTarget=${{ matrix.arch }} `
-          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:OptimizationPreference=${{ matrix.optimization }}
 
+
+  # Only for public repositories (auto cancelled in private repositories)
   aot-arm64:
     strategy:
       matrix:
-        runner: [windows-11-arm]
         os: [win]
         arch: [arm64]
-        optimization: ['Speed', 'Size']
         profile: [aot]
-        configuration: [Release]
-    runs-on: ${{ matrix.runner }}
+        optimization: ['Speed', 'Size']
+    runs-on: windows-11-arm
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -110,8 +105,7 @@ jobs:
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
-          /p:PublishProfile=${{ matrix.profile }}
-          /p:Configuration=${{ matrix.configuration }} `
+          /p:PublishProfile=${{ matrix.profile }} `
           /p:PlatformTarget=${{ matrix.arch }} `
-          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }}
+          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:OptimizationPreference=${{ matrix.optimization }}
