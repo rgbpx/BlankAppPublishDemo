@@ -1,23 +1,24 @@
 # This workflow will build and publish a WinUI 3 unpackaged desktop application
 # built on .NET.
 
-name: WinUI 3 app publish
+name: Build and Publish WinUI 3 App
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  release:
     strategy:
       matrix:
         configuration: [Release]
         os: [win]
-        arch: [x64]
+        arch: [x86, x64]
+        dotnet-version: ['8.0.x']
 
     runs-on: windows-latest
 
     env:
-      Project_Name: BlankAppPublishDemo
+      project_name: BlankAppPublishDemo
 
     steps:
     - name: Checkout
@@ -28,19 +29,19 @@ jobs:
     - name: Install .NET Core Runtime
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{ matrix.dotnet-version }}
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
 
     - name: Run dotnet publish
-      run: cd ${{ env.Project_Name }} && dotnet publish ${{ env.Project_Name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
+      run: cd ${{ env.project_name }} && dotnet publish ${{ env.project_name }}.csproj /p:Configuration=Release /p:PlatformTarget=${{ matrix.arch }} /p:PublishProfile=${{ matrix.os }}-${{ matrix.arch }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: App-net8.0-windows10.0.19041.0-${{ matrix.os }}-${{ matrix.arch }}
-        path: ${{ github.workspace }}/${{ env.Project_Name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.Project_Name }}.exe
+        name: ${{ env.project_name }}-net${{ matrix.dotnet-version }}-${{ matrix.os }}-${{ matrix.arch }}
+        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}/publish/${{ env.project_name }}.exe
         if-no-files-found: error
         compression-level: 9
         overwrite: true
