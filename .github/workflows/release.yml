@@ -13,7 +13,7 @@ jobs:
         configuration: [Release]
         os: [win]
         arch: [x86, x64]
-        dotnet: [8.0.18]
+        dotnet: ['8.0.18']
 
     runs-on: windows-latest
 
