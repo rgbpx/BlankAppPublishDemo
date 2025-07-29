@@ -2,7 +2,7 @@ name: Test PR labels
 
 on:
   pull_request:
-    types: [open]
+    types: [close]
     branches:
       - main
 
