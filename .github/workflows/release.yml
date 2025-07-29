@@ -85,23 +85,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Download all JIT artifacts
+      - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          # Use a wildcard to download all artifacts uploaded by the jit job
-          name: |
-            ${{ env.project_name }}-win-x86-jit*
-            ${{ env.project_name }}-win-x64-jit*
-            ${{ env.project_name }}-win-arm64-jit*
-          path: ./artifacts/jit
-          
-      - name: Download all AOT artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: |
-            ${{ env.project_name }}-win-x64-aot-speed
-            ${{ env.project_name }}-win-x64-aot-size
-          path: ./artifacts/aot
+          pattern: ${{ env.project_name }}-*
+          path: ./artifacts
 
       - name: List all downloaded artifacts
         run: |
