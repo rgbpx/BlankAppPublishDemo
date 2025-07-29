@@ -25,7 +25,7 @@ jobs:
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Run dotnet publish
+    - name: Dotnet build
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
@@ -34,13 +34,19 @@ jobs:
           /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:PublishSingleFile=${{ matrix.single-file }}
 
+    - name: Archive build result
+      run: |
+        Compress-Archive `
+          -Path ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }} `
+          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}
-        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}
+        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
         if-no-files-found: error
-        compression-level: 9
+        compression-level: 0 # since only transferred between the jobs
         overwrite: true
 
 
@@ -60,7 +66,7 @@ jobs:
     - name: Add MSBUILD to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Run dotnet publish
+    - name: Dotnet build
       run: |
         cd ${{ env.project_name }}
         dotnet publish ${{ env.project_name }}.csproj `
@@ -69,13 +75,19 @@ jobs:
           /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
           /p:OptimizationPreference=${{ matrix.optimization }}
 
+    - name: Archive build result
+      run: |
+        Compress-Archive `
+          -Path ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }} `
+          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}
-        path: ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}
+        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
         if-no-files-found: error
-        compression-level: 9
+        compression-level: 0 # since only transferred between the jobs
         overwrite: true
 
   
@@ -93,6 +105,12 @@ jobs:
 
       - name: List all downloaded artifacts
         run: Get-ChildItem -Recurse -Path ./artifacts
+
+      # Workaround for: https://github.com/actions/download-artifact/issues/374
+      # - name: Zip artifacts
+      #   run: |
+      #     cd ${{ env.project_name }}/bin
+      #     Compress-Archive -Path "${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}" -DestinationPath "${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
 
       - name: Publish
         uses: softprops/action-gh-release@v2
