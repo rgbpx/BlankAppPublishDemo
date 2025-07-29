@@ -3,7 +3,7 @@ name: Build and Publish WinUI 3 App
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "*"
 
 env:
   project_name: BlankAppPublishDemo
