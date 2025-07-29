@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show PR labels
-        run: echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
+        run: echo "Labels ${{ toJson(github.event.pull_request.labels) }}"
