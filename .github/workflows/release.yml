@@ -68,21 +68,19 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Dotnet build
-      run: |
-        cd ${{ github.event.repository.name }}
-        dotnet publish ${{ github.event.repository.name }}.csproj `
-          /p:PublishDir=bin\${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}\ `
-          /p:PlatformTarget=${{ matrix.arch }} `
-          /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-          /p:OptimizationPreference=${{ matrix.optimization }} `
-          /p:PublishAot=true `
-          /p:TrimMode=partial `
-          /p:PublishTrimmed=true `
-          /p:SelfContained=true `
-          /p:Configuration=Release `
-          /p:PublishReadyToRun=true `
-          /p:WindowsPackageType=None `
-          /p:WindowsAppSdkSelfContained=true
+      run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+            /p:PublishDir=${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}/ `
+            /p:PlatformTarget=${{ matrix.arch }} `
+            /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+            /p:OptimizationPreference=${{ matrix.optimization }} `
+            /p:PublishAot=true `
+            /p:TrimMode=partial `
+            /p:PublishTrimmed=true `
+            /p:SelfContained=true `
+            /p:Configuration=Release `
+            /p:PublishReadyToRun=true `
+            /p:WindowsPackageType=None `
+            /p:WindowsAppSdkSelfContained=true
 
     # Workaround for: https://github.com/actions/download-artifact/issues/374
     - name: Archive build result
