@@ -39,13 +39,13 @@ jobs:
       run: |
         Compress-Archive `
           -Path ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }} `
-          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
+          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}
-        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
+        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}${{ matrix.single-file && '-single-file' || '' }}.zip"
         if-no-files-found: error
         compression-level: 0 # since only transferred between the jobs
         overwrite: true
@@ -81,13 +81,13 @@ jobs:
       run: |
         Compress-Archive `
           -Path ${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }} `
-          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
+          -DestinationPath "${{ github.workspace }}/${{ env.project_name }}/bin/${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}
-        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
+        path: "${{ github.workspace }}/${{ env.project_name }}/bin/${{ env.project_name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.optimization }}.zip"
         if-no-files-found: error
         compression-level: 0 # since only transferred between the jobs
         overwrite: true
@@ -103,15 +103,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ env.project_name }}-*
-          path: ${{ github.workspace }}/artifacts
+          path: ./artifacts
 
       - name: List all downloaded artifacts
-        run: Get-ChildItem -Recurse -Path ${{ github.workspace }}/artifacts
+        run: Get-ChildItem -Recurse -Path ./artifacts
 
       - name: Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/artifacts/**/${{ env.project_name }}-*.zip
+          files: ./artifacts/**/${{ env.project_name }}-*.zip
           overwrite_files: true
           fail_on_unmatched_files: true
           make_latest: true
