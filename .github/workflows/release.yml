@@ -103,15 +103,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ env.project_name }}-*
-          path: ./artifacts
+          path: ${{ github.workspace }}/artifacts
 
       - name: List all downloaded artifacts
-        run: Get-ChildItem -Recurse -Path ./artifacts
+        run: Get-ChildItem -Recurse -Path ${{ github.workspace }}/artifacts
 
       - name: Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: ./artifacts/**/${{ env.project_name }}-*.zip
+          files: ${{ github.workspace }}/artifacts/**/${{ env.project_name }}-*.zip
           overwrite_files: true
           fail_on_unmatched_files: true
           make_latest: true
