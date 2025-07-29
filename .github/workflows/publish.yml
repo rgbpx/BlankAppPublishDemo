@@ -1,0 +1,112 @@
+name: Build and Publish WinUI 3 App
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-jit:
+    name: Build JIT artifacts 
+    strategy:
+      matrix:
+        os: [win]
+        arch: [x86, x64, arm64]
+        mode: [jit]
+        single-file: [false, true]
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBUILD to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Dotnet build
+      run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+            /p:PublishDir=${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }} `
+            /p:PlatformTarget=${{ matrix.arch }} `
+            /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+            /p:PublishSingleFile=${{ matrix.single-file }}
+
+    # Workaround for: https://github.com/actions/download-artifact/issues/374
+    - name: Archive build result
+      run: |
+        Compress-Archive `
+          -Path ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }} `
+          -DestinationPath "${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}.zip"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
+        path: "${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}.zip"
+        if-no-files-found: error
+        compression-level: 0 # since only transferred between the jobs
+        overwrite: true
+
+
+  build-aot:
+    name: Build AOT artifacts
+    strategy:
+      matrix:
+        os: [win]
+        arch: [x64]
+        mode: [aot]
+        optimization: ['speed', 'size']
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBUILD to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Dotnet build
+      run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+            /p:PublishDir=${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }} `
+            /p:PlatformTarget=${{ matrix.arch }} `
+            /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+            /p:OptimizationPreference=${{ matrix.optimization }} `
+            /p:PublishAot=true
+
+    # Workaround for: https://github.com/actions/download-artifact/issues/374
+    - name: Archive build result
+      run: |
+        Compress-Archive `
+          -Path ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }} `
+          -DestinationPath "${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}.zip"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+        path: "${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}.zip"
+        if-no-files-found: error
+        compression-level: 0 # since only transferred between the jobs
+        overwrite: true
+
+  
+  release-github:
+    name: Publish GitHub release
+    needs: [build-jit, build-aot]
+    runs-on: windows-latest
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ github.event.repository.name }}-*
+          path: ./artifacts
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
+          fail_on_unmatched_files: true
+          make_latest: true
+          prerelease: false
+          draft: false

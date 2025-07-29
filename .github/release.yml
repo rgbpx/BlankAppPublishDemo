@@ -1,0 +1,47 @@
+﻿# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - release-ignore
+    authors:
+      - dependabot
+      - github-release
+
+  categories:
+    - title: Breaking Changes 🚨
+      labels:
+        - release-major
+        - breaking-change
+
+    - title: New Features ✨
+      labels:
+        - release-minor
+        - enhancement
+        - feature
+
+    - title: Fixes 🐛
+      labels:
+        - release-patch
+        - bug
+        - fix
+
+    - title: Speed ⚡
+      labels:
+        - speed
+
+    - title: Performance 🔋
+      labels:
+        - performance
+
+    - title: Security 🛡️
+      labels:
+        - security
+
+    - title: Updated dependencies 📦
+      labels:
+        - dependencies
+
+    - title: Other Changes 📄
+      labels:
+        - "*"
