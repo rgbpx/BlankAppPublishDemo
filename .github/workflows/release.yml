@@ -3,7 +3,7 @@ name: Build and Publish WinUI 3 App
 on:
   push:
     tags:
-      - "*"
+      - "v*.*.*"
 
 env:
   project_name: BlankAppPublishDemo
@@ -12,7 +12,7 @@ jobs:
   build-jit:
     name: Build JIT artifacts 
     strategy:
-      matrix:
+      matrix
         os: [win]
         arch: [x86, x64, arm64]
         profile: [jit]
