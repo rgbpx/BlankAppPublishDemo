@@ -3,7 +3,8 @@
 changelog:
   exclude:
     labels:
-      - release-ignore
+      # gh label create release-ignore --color "#cccccc"
+      - release-ignore  
     authors:
       - dependabot
       - github-release
@@ -11,35 +12,45 @@ changelog:
   categories:
     - title: Breaking Changes 🚨
       labels:
+        # gh label create release-major --color "#ff99ff"
         - release-major
+        # gh label create breaking-change --color "#ff0000"
         - breaking-change
 
     - title: New Features ✨
       labels:
+        # gh label create release-minor --color "#00ff00"
         - release-minor
         - enhancement
+        # gh label create feature --color "#426942"
         - feature
 
     - title: Fixes 🐛
       labels:
+        # gh label create release-patch --color "#0000ff"
         - release-patch
         - bug
+        # gh label create fix --color "#123456"
         - fix
 
     - title: Speed ⚡
       labels:
+        # gh label create speed --color "#99ff99"
         - speed
 
     - title: Performance 🔋
       labels:
+        # gh label create performance --color "#ff9900"
         - performance
 
     - title: Security 🛡️
       labels:
+        # gh label create security --color "#9999ff"
         - security
 
     - title: Updated dependencies 📦
       labels:
+        # gh label create dependencies --color "#fedcba"
         - dependencies
 
     - title: Other Changes 📄
