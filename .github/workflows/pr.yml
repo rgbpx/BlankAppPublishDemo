@@ -1,10 +1,16 @@
 name: Test PR labels
 
-on: push
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   pr-labels:
     runs-on: ubuntu-latest
     steps:
-      - name: Show PR labels
+      - name: Show PR number
         run: echo "${{ github.event.pull_request.number }}"
+      - name: Show PR labels
+        run: echo "${{ github.event.pull_request.labels }}"
