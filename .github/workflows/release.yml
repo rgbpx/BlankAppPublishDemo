@@ -90,27 +90,24 @@ jobs:
         overwrite: true
 
   
-  # release-github:
-  #   name: Publish GitHub release
-  #   needs: [build-jit, build-aot]
-  #   runs-on: windows-latest
+  release-github:
+    name: Publish GitHub release
+    needs: [build-jit, build-aot]
+    runs-on: windows-latest
 
-  #   steps:
-  #     - name: Download all build artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         pattern: ${{ github.event.repository.name }}-*
-  #         path: ./artifacts
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ github.event.repository.name }}-*
+          path: ./artifacts
 
-  #     - name: List all downloaded artifacts
-  #       run: Get-ChildItem -Recurse -Path ./artifacts
-
-  #     - name: Publish
-  #       uses: softprops/action-gh-release@v2
-  #       with:
-  #         files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
-  #         overwrite_files: true
-  #         fail_on_unmatched_files: true
-  #         make_latest: true
-  #         prerelease: false
-  #         draft: false
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          make_latest: true
+          prerelease: false
+          draft: false
