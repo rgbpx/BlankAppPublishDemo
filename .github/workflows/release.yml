@@ -1,0 +1,54 @@
+name: Test PR labels
+
+on:
+  pull_request:
+    # types: closed
+    # branches: main
+    types: 
+      - closed
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+
+    # Only gets triggered on closed merged pull request
+    if: github.event.pull_request.merged
+
+    steps:
+      - name: Generate SemVer tag
+        id: gen_tag
+        uses: K-Phoen/semver-release-action@master
+        with:
+          release_branch: main
+          release_strategy: none
+          # customize labels?
+          tag_format: "v%major%.%minor%.%patch%"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # remove
+      - name: Print SemVer tag
+        run: echo "${{ steps.gen_tag.outputs.tag }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.gen_tag.outputs.tag }}
+          # Force update
+          allowUpdates: true
+          # Panic on artifact errors
+          artifactErrorsFailBuild: true
+          # Generate GitHub automatic release notes
+          generateReleaseNotes: true
+          makeLatest: true
+          # Supply artifacts
+          # artifacts: "release.tar.gz,foo/*.txt"
+          # artifactContentType:
+          # replacesArtifacts: true
