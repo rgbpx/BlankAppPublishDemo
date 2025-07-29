@@ -92,5 +92,5 @@ jobs:
           path: ./artifacts
 
       - name: List all downloaded artifacts
-        run: |
-          Get-ChildItem -Recurse -Path ./artifacts
+        run: Get-ChildItem -Recurse -Path ./artifacts
+          
