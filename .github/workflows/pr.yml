@@ -1,0 +1,11 @@
+name: Test PR labels
+
+on: push
+
+jobs:
+  pr-labels:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show PR labels
+        run: echo "Labels: ${{ toJson(github.event.pull_request.labels) }}"
