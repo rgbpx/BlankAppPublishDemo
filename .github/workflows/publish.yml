@@ -10,9 +10,6 @@ on:
 permissions:
   contents: write
 
-env:
-  REPO_ROOT: ${{ github.workspace }}/${{ github.event.repository.name }}
-
 jobs:
   build-jit:
     name: JIT build
@@ -25,7 +22,7 @@ jobs:
         single-file: [false, true]
     env:
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
-      BUILD_PATH: ${{ env.REPO_ROOT }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
+      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,7 +31,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Dotnet build
-        run: dotnet publish ${{ env.REPO_ROOT }}/${{ github.event.repository.name }}.csproj `
+        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               /p:PublishDir=${{ env.BUILD_PATH }} `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
@@ -66,7 +63,7 @@ jobs:
         optimization: ['speed', 'size']
     env:
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
-      BUILD_PATH: ${{ env.REPO_ROOT }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,7 +72,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Dotnet build
-        run: dotnet publish ${{ env.REPO_ROOT }}/${{ github.event.repository.name }}.csproj `
+        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               /p:PublishDir=${{ env.BUILD_PATH }} `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
