@@ -6,27 +6,35 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      version-number: '3.0.4'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+
+      - uses: actions-ecosystem/action-bump-semver@v1
+        id: bump-semver
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          current_version: ${{ steps.get-latest-tag.outputs.tag }}
+          level: patch
+        
+      #   with:
+      #     token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Set up Git user
-        run: |
-          git config user.email "${{ secrets.USER_EMAIL }}"
-          git config user.name "${{ secrets.USER_NAME }}"
+      # - name: Set up Git user
+      #   run: |
+      #     git config user.email "${{ secrets.USER_EMAIL }}"
+      #     git config user.name "${{ secrets.USER_NAME }}"
 
-      - name: Create tag v${{ env.version-number }}
-        run: git tag v${{ env.version-number }}
+      # - name: Create tag v${{ env.version-number }}
+      #   run: git tag v${{ env.version-number }}
           
 
-      - name: Push tag v${{ env.version-number }}
-        run: |
-          git tag v${{ env.version-number }}
-          git push origin v${{ env.version-number }}
+      # - name: Push tag v${{ env.version-number }}
+      #   run: |
+      #     git tag v${{ env.version-number }}
+      #     git push origin v${{ env.version-number }}
 
       #
 
