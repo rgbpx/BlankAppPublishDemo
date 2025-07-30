@@ -30,6 +30,7 @@ jobs:
 
       - name: Dotnet build
         run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+              --no-restore `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
               /p:PublishSingleFile=${{ matrix.single-file }}
@@ -59,6 +60,7 @@ jobs:
 
       - name: Dotnet build
         run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+              --no-restore `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
               /p:OptimizationPreference=${{ matrix.optimization }} `
