@@ -19,14 +19,14 @@ jobs:
           git config user.email "${{ secrets.USER_EMAIL }}"
           git config user.name "${{ secrets.USER_NAME }}"
 
-      - name: Create tag v{{ env.version-number }}
-        run: git tag v{{ env.version-number }}
+      - name: Create tag v${{ env.version-number }}
+        run: git tag v${{ env.version-number }}
           
 
-      - name: Push tag v{{ env.version-number }}
+      - name: Push tag v${{ env.version-number }}
         run: |
-          git tag v{{ env.version-number }}
-          git push origin v{{ env.version-number }}
+          git tag v${{ env.version-number }}
+          git push origin v${{ env.version-number }}
 
       #
 
