@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
     # Only merged pull request
-    # if: github.event.pull_request.merged
+    # ? already handled by guard in action below?
+    if: github.event.pull_request.merged
 
     steps:
       - name: Generate SemVer tag
