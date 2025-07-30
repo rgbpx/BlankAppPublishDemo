@@ -20,8 +20,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -33,8 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Restore dependencies
+        run: dotnet restore ${{ github.workspace }}/project.csproj
+
       - name: Dotnet build
-        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               --no-restore `
               --no-build `
               /p:PublishDir=${{ env.BUILD_PATH }} `
@@ -42,8 +47,3 @@ jobs:
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
               /p:OptimizationPreference=${{ matrix.optimization }} `
               /p:PublishAot=true
-
-      - name: Archive build
-        run: Compress-Archive `
-              -Path ${{ env.BUILD_PATH }} `
-              -DestinationPath "${{ env.BUILD_PATH }}.zip"
