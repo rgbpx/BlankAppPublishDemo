@@ -1,3 +1,5 @@
+# Perform dotnet build on every push event
+
 name: Build
 
 on: push
@@ -5,18 +7,20 @@ on: push
 jobs:
   build-jit:
     name: JIT build
+    runs-on: windows-latest
     strategy:
       matrix:
         os: [win]
         arch: [x86, x64, arm64]
         mode: [jit]
         single-file: [false, true]
-    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Add MSBUILD to PATH
         uses: microsoft/setup-msbuild@v2
+
       - name: Dotnet build
         run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               /p:PlatformTarget=${{ matrix.arch }} `
@@ -35,8 +39,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Add MSBUILD to PATH
         uses: microsoft/setup-msbuild@v2
+
       - name: Dotnet build
         run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               /p:PlatformTarget=${{ matrix.arch }} `
