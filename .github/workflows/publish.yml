@@ -76,9 +76,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
-
       - name: Dotnet build
         run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               --no-restore `
