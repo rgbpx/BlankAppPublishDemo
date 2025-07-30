@@ -21,6 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - run: echo "${{ env.NUGET_PACKAGES }}"
       - run: echo "${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}/packages.lock.json"
 
       - name: Setup .NET
