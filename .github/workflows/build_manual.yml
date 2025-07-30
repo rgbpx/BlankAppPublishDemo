@@ -7,6 +7,12 @@ jobs:
   manual-aot:
     name: AOT manual build
     runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [win]
+        arch: [x64]
+        mode: [aot]
+        optimization: ['size']
     env:
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
       BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
