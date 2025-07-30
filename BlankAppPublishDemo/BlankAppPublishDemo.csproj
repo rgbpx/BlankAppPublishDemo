@@ -82,5 +82,7 @@
   </PropertyGroup>
 
   <!-- Enable lock file for CI cache -->
-  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
 </Project>
