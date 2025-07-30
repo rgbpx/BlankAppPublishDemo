@@ -19,12 +19,14 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        os: win
+        os: 
+          - win
         arch:
           - x86
           - x64
           - arm64
-        mode: jit
+        mode: 
+          - jit
         single-file:
           - false
           - true
@@ -67,9 +69,12 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        os: win
-        arch: x64
-        mode: aot
+        os: 
+          - win
+        arch: 
+          - x64
+        mode: 
+          - aot
         optimization: 
           - 'speed'
           - 'size'
