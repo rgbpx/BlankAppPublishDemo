@@ -14,15 +14,11 @@ jobs:
         mode: [aot]
         optimization: ['size']
     env:
-      # NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
       BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # - run: echo "${{ env.NUGET_PACKAGES }}"
-      - run: echo "./${{ github.event.repository.name }}/packages.lock.json"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -31,9 +27,8 @@ jobs:
           cache: true
           cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
 
-
       - name: Restore dependencies
-        run: dotnet restore --locked-mode --force-evaluate
+        run: dotnet restore '${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
       # - name: Cache NuGet packages
       #   uses: actions/cache@v4
