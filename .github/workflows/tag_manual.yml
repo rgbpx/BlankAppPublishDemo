@@ -7,41 +7,50 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code ⬇️
-        uses: actions/checkout@v4
+      # - name: Checkout code ⬇️
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     #fetch-tags: true
+      #     token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
         with:
-          fetch-depth: 0
-          #fetch-tags: true
-          token: ${{ secrets.PAT_TOKEN }}
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
-      - name: Get latest tag 🔖
-        uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
+      - name: List keys
+        run: gpg -K
 
-      - name: Bump tag 🏷️
-        uses: actions-ecosystem/action-bump-semver@v1
-        id: bump-semver
-        with:
-          current_version: ${{ steps.get-latest-tag.outputs.tag }}
-          level: patch
+      # - name: Get latest tag 🔖
+      #   uses: actions-ecosystem/action-get-latest-tag@v1
+      #   id: get-latest-tag
 
-      - name: Setup git credentials 🪪
-        shell: bash
-        run: |
-          git config user.email "${{ secrets.USER_EMAIL }}"
-          git config user.name "${{ secrets.USER_NAME }}"
+      # - name: Bump tag 🏷️
+      #   uses: actions-ecosystem/action-bump-semver@v1
+      #   id: bump-semver
+      #   with:
+      #     current_version: ${{ steps.get-latest-tag.outputs.tag }}
+      #     level: patch
 
-      - name: Create tag 🎫
-        shell: bash
-        run: |
-          tag=${{ steps.bump-semver.outputs.new_version }}
-          git tag -a "${tag}" -m "Release ${tag}"
+      # - name: Setup git credentials 🪪
+      #   shell: bash
+      #   run: |
+      #     git config user.email "${{ secrets.USER_EMAIL }}"
+      #     git config user.name "${{ secrets.USER_NAME }}"
+
+      # - name: Create tag 🎫
+      #   shell: bash
+      #   run: |
+      #     tag=${{ steps.bump-semver.outputs.new_version }}
+      #     git tag -a "${tag}" -m "Release ${tag}"
         
-      - name: Push tag ⬆️
-        shell: bash
-        run: |
-          tag=${{ steps.bump-semver.outputs.new_version }}
-          git push origin "${tag}"
+      # - name: Push tag ⬆️
+      #   shell: bash
+      #   run: |
+      #     tag=${{ steps.bump-semver.outputs.new_version }}
+      #     git push origin "${tag}"
           
           
       # - uses: actions-ecosystem/action-push-tag@v1
