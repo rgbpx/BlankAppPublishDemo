@@ -10,31 +10,22 @@ on:
 permissions:
   contents: write
 
-env:
-  REPO_ROOT:  ${{ github.workspace }}/${{ github.event.repository.name }}
-
 jobs:
   build-jit:
     name: JIT build
     runs-on: windows-latest
     strategy:
       matrix:
-        os: 
-          - win
-        arch:
-          - x86
-          - x64
-          - arm64
-        mode: 
-          - jit
-        single-file:
-          - false
-          - true
+        os: [win]
+        arch: [x86, x64, arm64]
+        mode: [jit]
+        single-file: [false, true]
     env:
       RID:        ${{ matrix.os }}-${{ matrix.arch }}
       SUFFIX:     ${{ matrix.single-file && '-single-file' || '' }}
       BUILD_NAME: ${{ github.event.repository.name }}-${{ env.RID }}-${{ matrix.mode }}${{ env.SUFFIX }}
       BUILD_PATH: ${{ env.REPO_ROOT }}/bin/${{ env.BUILD_NAME }}
+      REPO_ROOT: ${{ github.workspace }}/${{ github.event.repository.name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -69,19 +60,15 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        os: 
-          - win
-        arch: 
-          - x64
-        mode: 
-          - aot
-        optimization: 
-          - 'speed'
-          - 'size'
+        os: [win]
+        arch: [x64]
+        mode: [aot]
+        optimization: ['speed', 'size']
     env:
       RID:        ${{ matrix.os }}-${{ matrix.arch }}
       BUILD_NAME: ${{ github.event.repository.name }}-${{ env.RID }}-${{ matrix.mode }}-${{ matrix.optimization }}
       BUILD_PATH: ${{ env.REPO_ROOT }}/bin/${{ env.BUILD_NAME }}
+      REPO_ROOT: ${{ github.workspace }}/${{ github.event.repository.name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -115,9 +102,7 @@ jobs:
   publish-github:
     name: Publish GitHub release
     runs-on: windows-latest
-    needs: 
-      - build-jit
-      - build-aot
+    needs: [build-jit, build-aot]
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
