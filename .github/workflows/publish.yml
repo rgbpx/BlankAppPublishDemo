@@ -3,115 +3,119 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - '**'
+  workflow_dispatch:
+# on:
+#   push:
+#     tags:
+#       - '**'
 
 permissions:
   contents: write
 
 jobs:
-  build-jit:
-    name: JIT build
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        os: [win]
-        arch: [x86, x64, arm64]
-        mode: [jit]
-        single-file: [false, true]
-    env:
-      BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
-      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  tmp:
+    runs-on: ubuntu-latest
+  # build-jit:
+  #   name: JIT build
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       os: [win]
+  #       arch: [x86, x64, arm64]
+  #       mode: [jit]
+  #       single-file: [false, true]
+  #   env:
+  #     BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
+  #     BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
+  #     - name: Add MSBUILD to PATH
+  #       uses: microsoft/setup-msbuild@v2
 
-      - name: Dotnet build
-        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              /p:PublishDir=${{ env.BUILD_PATH }} `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:PublishSingleFile=${{ matrix.single-file }}
+  #     - name: Dotnet build
+  #       run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+  #             /p:PublishDir=${{ env.BUILD_PATH }} `
+  #             /p:PlatformTarget=${{ matrix.arch }} `
+  #             /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+  #             /p:PublishSingleFile=${{ matrix.single-file }}
 
-        # Workaround for: https://github.com/actions/download-artifact/issues/374
-      - name: Archive build result
-        run: Compress-Archive `
-              -Path ${{ env.BUILD_PATH }} `
-              -DestinationPath "${{ env.BUILD_PATH }}.zip"
+  #       # Workaround for: https://github.com/actions/download-artifact/issues/374
+  #     - name: Archive build result
+  #       run: Compress-Archive `
+  #             -Path ${{ env.BUILD_PATH }} `
+  #             -DestinationPath "${{ env.BUILD_PATH }}.zip"
 
-      - name: Upload build archive
-        uses: actions/upload-artifact@v4
-        with:
-          name:               ${{ env.BUILD_NAME }}
-          path:               "${{ env.BUILD_PATH }}.zip"
-          if-no-files-found:  error
-          compression-level:  0 # since only transferring between the jobs
-          overwrite:          true
+  #     - name: Upload build archive
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name:               ${{ env.BUILD_NAME }}
+  #         path:               "${{ env.BUILD_PATH }}.zip"
+  #         if-no-files-found:  error
+  #         compression-level:  0 # since only transferring between the jobs
+  #         overwrite:          true
 
-  build-aot:
-    name: AOT build
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        os: [win]
-        arch: [x64]
-        mode: [aot]
-        optimization: ['speed', 'size']
-    env:
-      BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
-      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # build-aot:
+  #   name: AOT build
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       os: [win]
+  #       arch: [x64]
+  #       mode: [aot]
+  #       optimization: ['speed', 'size']
+  #   env:
+  #     BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+  #     BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
+  #     - name: Add MSBUILD to PATH
+  #       uses: microsoft/setup-msbuild@v2
 
-      - name: Dotnet build
-        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              /p:PublishDir=${{ env.BUILD_PATH }} `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:OptimizationPreference=${{ matrix.optimization }} `
-              /p:PublishAot=true
+  #     - name: Dotnet build
+  #       run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+  #             /p:PublishDir=${{ env.BUILD_PATH }} `
+  #             /p:PlatformTarget=${{ matrix.arch }} `
+  #             /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+  #             /p:OptimizationPreference=${{ matrix.optimization }} `
+  #             /p:PublishAot=true
 
-        # Workaround for: https://github.com/actions/download-artifact/issues/374
-      - name: Archive build result
-        run: Compress-Archive `
-              -Path ${{ env.BUILD_PATH }} `
-              -DestinationPath "${{ env.BUILD_PATH }}.zip"
+  #       # Workaround for: https://github.com/actions/download-artifact/issues/374
+  #     - name: Archive build result
+  #       run: Compress-Archive `
+  #             -Path ${{ env.BUILD_PATH }} `
+  #             -DestinationPath "${{ env.BUILD_PATH }}.zip"
 
-      - name: Upload build archive
-        uses: actions/upload-artifact@v4
-        with:
-          name:               ${{ env.BUILD_NAME }}
-          path:               "${{ env.BUILD_PATH }}.zip"
-          if-no-files-found:  error
-          compression-level:  0 # since only transferring between the jobs
-          overwrite:          true
+  #     - name: Upload build archive
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name:               ${{ env.BUILD_NAME }}
+  #         path:               "${{ env.BUILD_PATH }}.zip"
+  #         if-no-files-found:  error
+  #         compression-level:  0 # since only transferring between the jobs
+  #         overwrite:          true
     
-  publish-github:
-    name: Publish GitHub release
-    runs-on: windows-latest
-    needs: [build-jit, build-aot]
-    steps:
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ github.event.repository.name }}-*
-          path: ./artifacts
+  # publish-github:
+  #   name: Publish GitHub release
+  #   runs-on: windows-latest
+  #   needs: [build-jit, build-aot]
+  #   steps:
+  #     - name: Download all build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: ${{ github.event.repository.name }}-*
+  #         path: ./artifacts
 
-      - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
-          fail_on_unmatched_files: true
-          generate_release_notes: true
-          make_latest: true
-          prerelease: false
-          draft: false
+  #     - name: Publish GitHub release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         token: ${{ secrets.PAT_TOKEN }}
+  #         files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
+  #         fail_on_unmatched_files: true
+  #         generate_release_notes: true
+  #         make_latest: true
+  #         prerelease: false
+  #         draft: false
