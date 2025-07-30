@@ -31,7 +31,7 @@ jobs:
           release_strategy: none
           tag_format: "v%major%.%minor%.%patch%"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Check if git tag already exists
         run: git rev-parse "refs/tags/${{ steps.gen-tag.outputs.tag }}" && exit 1 || exit 0
@@ -47,4 +47,4 @@ jobs:
       - name: Push git tag
         run: git push origin ${{ steps.gen-tag.outputs.tag }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
