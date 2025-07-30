@@ -1,0 +1,56 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      version-number: '3.0.4'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set up Git user
+        run: |
+          git config user.email "${{ secrets.USER_EMAIL }}"
+          git config user.name "${{ secrets.USER_NAME }}"
+
+      - name: Create tag v{{ env.version-number }}
+        run: git tag v{{ env.version-number }}
+          
+
+      - name: Push tag v{{ env.version-number }}
+        run: |
+          git tag v{{ env.version-number }}
+          git push origin v{{ env.version-number }}
+
+      #
+
+      # - name: Push tag
+      #   env:
+      #     PAT: ${{ secrets.PAT }}  # Repository secret containing PAT
+      #   run: |
+      #     git config user.name "github-actions"
+      #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #     git tag -a v1.0.0 -m "Release v1.0.0"
+      #     git push "https://$PAT@github.com/$GITHUB_REPOSITORY.git" v1.0.0
+
+
+      #
+
+      # - name: Set up Git user
+      #   run: |
+      #     git config --global user.email "${{ secrets.USER_EMAIL }}"
+      #     git config --global user.name "${{ secrets.USER_NAME }}"
+
+      # - name: Add git tag
+      #   run: git tag -a ${{ steps.gen-tag.outputs.tag }} -m "Release ${{ steps.gen-tag.outputs.tag }}"
+
+      # - name: Push git tag
+      #   run: git push origin ${{ steps.gen-tag.outputs.tag }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
