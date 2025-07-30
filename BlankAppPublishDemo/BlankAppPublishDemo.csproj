@@ -80,4 +80,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>None</DebugType>
   </PropertyGroup>
+
+  <!-- Enable lock file for CI cache -->
+  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 </Project>
