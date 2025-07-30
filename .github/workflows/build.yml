@@ -5,47 +5,49 @@ name: Build
 on: push
 
 jobs:
-  build-jit:
-    name: JIT build
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        os: [win]
-        arch: [x86, x64, arm64]
-        mode: [jit]
-        single-file: [false, true]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  tmp:
+    runs-on: ubuntu-latest
+  # build-jit:
+  #   name: JIT build
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       os: [win]
+  #       arch: [x86, x64, arm64]
+  #       mode: [jit]
+  #       single-file: [false, true]
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
+  #     - name: Add MSBUILD to PATH
+  #       uses: microsoft/setup-msbuild@v2
 
-      - name: Dotnet build
-        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:PublishSingleFile=${{ matrix.single-file }}
+  #     - name: Dotnet build
+  #       run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+  #             /p:PlatformTarget=${{ matrix.arch }} `
+  #             /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+  #             /p:PublishSingleFile=${{ matrix.single-file }}
 
-  build-aot:
-    name: AOT build
-    strategy:
-      matrix:
-        os: [win]
-        arch: [x64]
-        mode: [aot]
-        optimization: ['speed', 'size']
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # build-aot:
+  #   name: AOT build
+  #   strategy:
+  #     matrix:
+  #       os: [win]
+  #       arch: [x64]
+  #       mode: [aot]
+  #       optimization: ['speed', 'size']
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Add MSBUILD to PATH
-        uses: microsoft/setup-msbuild@v2
+  #     - name: Add MSBUILD to PATH
+  #       uses: microsoft/setup-msbuild@v2
 
-      - name: Dotnet build
-        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:OptimizationPreference=${{ matrix.optimization }} `
-              /p:PublishAot=true
+  #     - name: Dotnet build
+  #       run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+  #             /p:PlatformTarget=${{ matrix.arch }} `
+  #             /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+  #             /p:OptimizationPreference=${{ matrix.optimization }} `
+  #             /p:PublishAot=true
