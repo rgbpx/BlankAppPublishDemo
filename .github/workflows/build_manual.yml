@@ -23,8 +23,20 @@ jobs:
       - name: Add MSBUILD to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\.nuget\packages
+            ${{ github.workspace }}\${{ github.event.repository.name }}\obj
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Dotnet build
         run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+              --no-restore `
+              --no-build `
               /p:PublishDir=${{ env.BUILD_PATH }} `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
@@ -35,18 +47,3 @@ jobs:
         run: Compress-Archive `
               -Path ${{ env.BUILD_PATH }} `
               -DestinationPath "${{ env.BUILD_PATH }}.zip"
-
-      # - name: Cache build
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: "${{ env.BUILD_PATH }}.zip"
-      #     key: ${{ env.BUILD_NAME }}-primes
-
-      # - name: Upload build archive
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name:               ${{ env.BUILD_NAME }}
-      #     path:               "${{ env.BUILD_PATH }}.zip"
-      #     if-no-files-found:  error
-      #     compression-level:  0 # since only transferring between the jobs
-      #     overwrite:          true
