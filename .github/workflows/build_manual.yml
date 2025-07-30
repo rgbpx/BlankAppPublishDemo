@@ -28,7 +28,7 @@ jobs:
           cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
 
       - name: Restore dependencies
-        run: dotnet restore '${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
       # - name: Cache NuGet packages
       #   uses: actions/cache@v4
