@@ -51,7 +51,6 @@ jobs:
       - name: Dotnet build
         run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
               --no-restore `
-              --no-build `
               /p:PublishDir=${{ env.BUILD_PATH }} `
               /p:PlatformTarget=${{ matrix.arch }} `
               /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
