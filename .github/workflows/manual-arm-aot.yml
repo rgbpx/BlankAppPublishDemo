@@ -1,0 +1,40 @@
+name: Manual ARM AOT build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  manual-arm-aot:
+    name: Manual ARM AOT build
+    runs-on: windows-11-arm
+    strategy:
+      matrix:
+        os: [win]
+        arch: [arm64]
+        mode: [aot]
+        optimization: ['size']
+    env:
+      BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+
+      - name: Restore dependencies
+        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+
+      - name: Dotnet build
+        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+              --no-restore `
+              /p:PublishDir=${{ env.BUILD_PATH }} `
+              /p:PlatformTarget=${{ matrix.arch }} `
+              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+              /p:OptimizationPreference=${{ matrix.optimization }} `
+              /p:PublishAot=true
