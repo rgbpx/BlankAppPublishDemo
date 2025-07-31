@@ -66,13 +66,20 @@ jobs:
 
   build-aot:
     name: AOT build
-    runs-on: windows-latest
     strategy:
       matrix:
         os: [win]
-        arch: [x64]
         mode: [aot]
-        optimization: ['speed', 'size']
+        optimization: [ speed, size ]
+        include:
+          # x64 build on the default windows runner
+          - runner: windows-latest
+            arch: x64
+
+          # ARM64 build on the Windows ARM runner
+          - runner: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     env:
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
       BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
