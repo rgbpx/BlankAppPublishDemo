@@ -49,9 +49,16 @@ jobs:
     strategy:
       matrix:
         os: [win]
-        arch: [x64]
-        optimization: [speed, size]
-    runs-on: windows-latest
+        optimization: [ speed, size ]
+        include:
+          # x64 build on the default windows runner
+          - runner: windows-latest
+            arch: x64
+
+          # ARM64 build on the Windows ARM runner
+          - runner: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
