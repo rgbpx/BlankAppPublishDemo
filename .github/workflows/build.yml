@@ -48,16 +48,23 @@ jobs:
     name: AOT build (${{ matrix.arch }})
     strategy:
       matrix:
-        os: [win]
-        optimization: [ speed, size ]
         include:
-          # x64 build on the default windows runner
           - runner: windows-latest
-            arch: x64
-
-          # ARM64 build on the Windows ARM runner
+            arch:   x64
+            os:     win
+            optimization: speed
+          - runner: windows-latest
+            arch:   x64
+            os:     win
+            optimization: size
           - runner: windows-11-arm
-            arch: arm64
+            arch:   arm64
+            os:     win
+            optimization: speed
+          - runner: windows-11-arm
+            arch:   arm64
+            os:     win
+            optimization: size
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
