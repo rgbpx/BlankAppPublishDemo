@@ -65,7 +65,7 @@ jobs:
           overwrite:          true
 
   build-aot:
-    name: AOT build
+    name: AOT build (${{ matrix.arch }})
     strategy:
       matrix:
         os: [win]
