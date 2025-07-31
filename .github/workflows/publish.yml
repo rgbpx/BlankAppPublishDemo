@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+env:
+  DOTNET_VERSION:     '8.0.x'
+  DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
+
 jobs:
   build-jit:
     name: JIT build
@@ -30,9 +34,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
@@ -79,9 +83,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
