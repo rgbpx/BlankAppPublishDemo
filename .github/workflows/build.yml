@@ -49,21 +49,21 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: windows-latest
-            arch:   x64
-            os:     win
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
             optimization: speed
-          - runner: windows-latest
-            arch:   x64
-            os:     win
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
             optimization: size
-          - runner: windows-11-arm
-            arch:   arm64
-            os:     win
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
             optimization: speed
-          - runner: windows-11-arm
-            arch:   arm64
-            os:     win
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
             optimization: size
     runs-on: ${{ matrix.runner }}
     steps:
