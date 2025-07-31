@@ -62,7 +62,7 @@ jobs:
         # Continue only with new semver tag (skip if no semver bump)
         if: ${{ steps.bump-semver.outputs.new_version != null }}
         uses: crazy-max/ghaction-import-gpg@v6
-        id: gpg
+        id: import-gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
@@ -79,7 +79,7 @@ jobs:
         shell: bash
         run: |
           tag=${{ steps.bump-semver.outputs.new_version }}
-          keyid=${{ steps.gpg.outputs.keyid }}
+          keyid=${{ steps.import-gpg.outputs.keyid }}
           git tag -u ${keyid} "${tag}" -m "Release ${tag}"
 
       - name: Push tag
