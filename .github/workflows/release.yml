@@ -63,21 +63,21 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
 
       - name: Checkout code
-        if: ${{ steps.bump-semver.outputs.new_version != null' && steps.import-gpg.outputs.keyid != null }}
+        if: ${{ steps.bump-semver.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Setup git credentials
-        if: ${{ steps.bump-semver.outputs.new_version != null' && steps.import-gpg.outputs.keyid != null }}
+        if: ${{ steps.bump-semver.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
         run: |
           git config user.email "${{ secrets.USER_EMAIL }}"
           git config user.name "${{ secrets.USER_NAME }}"
           
       - name: Create new (signed) tag
-        if: ${{ steps.bump-semver.outputs.new_version != null' && steps.import-gpg.outputs.keyid != null }}
+        if: ${{ steps.bump-semver.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
         run: |
           tag=${{ steps.bump-semver.outputs.new_version }}
@@ -85,7 +85,7 @@ jobs:
           git tag -u ${keyid} "${tag}" -m "Release ${tag}"
 
       - name: Push tag
-        if: ${{ steps.bump-semver.outputs.new_version != null' && steps.import-gpg.outputs.keyid != null }}
+        if: ${{ steps.bump-semver.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
         run: |
           tag=${{ steps.bump-semver.outputs.new_version }}
