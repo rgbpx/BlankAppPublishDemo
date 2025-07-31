@@ -45,7 +45,7 @@ jobs:
                 /p:PublishSingleFile=${{ matrix.single-file }}
 
   build-aot:
-    name: AOT build
+    name: AOT build (${{ matrix.arch }})
     strategy:
       matrix:
         os: [win]
