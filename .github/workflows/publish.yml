@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+env:
+  DOTNET_VERSION:     '8.0.x'
+  DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
+
 jobs:
   build-jit:
     name: JIT build
@@ -30,9 +34,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
@@ -61,14 +65,31 @@ jobs:
           overwrite:          true
 
   build-aot:
-    name: AOT build
-    runs-on: windows-latest
+    name: AOT build (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.optimization }})
     strategy:
       matrix:
-        os: [win]
-        arch: [x64]
-        mode: [aot]
-        optimization: ['speed', 'size']
+        include:
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
+            mode:         aot
+            optimization: speed
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
+            mode:         aot
+            optimization: size
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
+            mode:         aot
+            optimization: speed
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
+            mode:         aot
+            optimization: size
+    runs-on: ${{ matrix.runner }}
     env:
       BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
       BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
@@ -79,9 +100,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate

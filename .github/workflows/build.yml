@@ -45,13 +45,27 @@ jobs:
                 /p:PublishSingleFile=${{ matrix.single-file }}
 
   build-aot:
-    name: AOT build
+    name: AOT build (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.optimization }})
     strategy:
       matrix:
-        os: [win]
-        arch: [x64]
-        optimization: [speed, size]
-    runs-on: windows-latest
+        include:
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
+            optimization: speed
+          - runner:       windows-latest
+            arch:         x64
+            os:           win
+            optimization: size
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
+            optimization: speed
+          - runner:       windows-11-arm
+            arch:         arm64
+            os:           win
+            optimization: size
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
