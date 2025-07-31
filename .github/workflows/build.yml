@@ -1,8 +1,18 @@
-# Perform dotnet build on every push event
+﻿# Perform .NET build on every commit push event to any branch except main
 
 name: Build
 
-on: push
+# Run only on commit push event to any branch except main and ignore tag pushes
+on:
+  push:
+    # run on every branch except main
+    branches-ignore: [main]
+    # but never run on tag‐only pushes
+    tags-ignore: ['*']
+
+env:
+  DOTNET_VERSION:     '8.0.x'
+  DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
 
 jobs:
   build-jit:
@@ -12,8 +22,7 @@ jobs:
       matrix:
         os: [win]
         arch: [x86, x64, arm64]
-        mode: [jit]
-        single-file: [false, true]
+        singleFile: [false, true]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,19 +30,19 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
-        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+      - name: Restore .NET dependencies
+        run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
-      - name: Dotnet build
-        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              --no-restore `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:PublishSingleFile=${{ matrix.single-file }}
+      - name: Run .NET build
+        run:  dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+                --no-restore `
+                /p:PlatformTarget=${{ matrix.arch }} `
+                /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+                /p:PublishSingleFile=${{ matrix.single-file }}
 
   build-aot:
     name: AOT build
@@ -41,8 +50,7 @@ jobs:
       matrix:
         os: [win]
         arch: [x64]
-        mode: [aot]
-        optimization: ['speed', 'size']
+        optimization: [speed, size]
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -51,17 +59,17 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: './${{ github.event.repository.name }}/packages.lock.json'
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
-        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+      - name: Restore .NET dependencies
+        run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
-      - name: Dotnet build
-        run: dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              --no-restore `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:OptimizationPreference=${{ matrix.optimization }} `
-              /p:PublishAot=true
+      - name: Run .NET build
+        run:  dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+                --no-restore `
+                /p:PlatformTarget=${{ matrix.arch }} `
+                /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+                /p:OptimizationPreference=${{ matrix.optimization }} `
+                /p:PublishAot=true
