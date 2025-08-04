@@ -1,0 +1,56 @@
+name: Manual MSIX build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  manual-msix:
+    name: Manual MSIX build
+    runs-on: windows-latest
+    env:
+      BUILD_NAME: ${{ github.event.repository.name }}-win-x64
+      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-win-x64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        working-directory: ./${{ github.event.repository.name }}
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: './packages.lock.json'
+
+      - name: Restore dependencies
+        working-directory: ./${{ github.event.repository.name }}
+        run: dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+
+      - name: Build
+        run: dotnet build -c Release -f:net8.0-windows10.0.19041.0
+        
+
+      - name: Dotnet build
+        working-directory: ./${{ github.event.repository.name }}
+        run: dotnet publish ./${{ github.event.repository.name }}.csproj `
+              --no-restore `
+              /p:Configuration=Release `
+              /p:PlatformTarget=x64 `
+              /p:RuntimeIdentifier=win-x64 `
+              /p:AppxBundlePlatforms="x64" `
+              /p:AppxBundle=Always `
+              /p:AppxPackageSigningEnabled=false `
+              /p:UapAppxPackageBuildMode=StoreUpload `
+              /p:GenerateAppxPackageOnBuild=true `
+              /p:SkipUnnecessaryBuilds=true `
+              /p:BuildProjectReferences=false `
+              /p:WindowsPackageType=MSIX `
+              /p:IncludeDeviceTargetAssets=false `
+              /p:GenerateTestArtifacts=false `
+              /p:EnableMsixTooling=true `
+              /p:AppxPackageDir="${{ env.BUILD_PATH }}"

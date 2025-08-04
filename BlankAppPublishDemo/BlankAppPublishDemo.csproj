@@ -10,22 +10,45 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>BlankAppPublishDemo</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <WindowsPackageType>None</WindowsPackageType>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <Configuration>Release</Configuration>
-    <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSdkSelfContained>true</WindowsAppSdkSelfContained>
-    <SelfContained>true</SelfContained>
-    <TrimMode>partial</TrimMode>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
-    <UseWinUI>true</UseWinUI>
+
 
     <!-- Hide WebView trimming warning in the builds -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+
+    <!-- MSIX -->
+    <!-- https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/project-properties -->
+    <!-- https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/deploy-packaged-apps -->
+    <!-- https://github.com/microsoft/WindowsAppSDK-Samples/tree/main/Samples/DeploymentManager -->
+    <!-- https://learn.microsoft.com/en-us/windows/uwp/packaging/auto-build-package-uwp-apps -->
+
+    <!-- true (to enable), or absent (to disable) -->
+    <!--<EnableMsixTooling>true</EnableMsixTooling>-->
+
+    <!-- true, or absent (for false) -->
+    <!--<UseWinUI>true</UseWinUI>-->
+
+    <!-- true, or absent (for false) - Determines whether or not an app is deployed self-contained. -->
+    <!--<WindowsAppSdkSelfContained>true</WindowsAppSdkSelfContained>-->
+    <!--<SelfContained>true</SelfContained>-->
+
+    <!--<TrimMode>partial</TrimMode>-->
+    <!--<PublishTrimmed>true</PublishTrim-->
+    <!--<PublishReadyToRun>true</PublishReadyToRun>-->
+    <!--<PublishSingleFile>false</PublishSingleFile>-->
+
+    <!--<WindowsAppSdkBootstrapInitialize>true</WindowsAppSdkBootstrapInitialize>-->
+
+    <!-- None, or absent (to disable the auto-initializer) -->
+    <!-- for an unpackaged app causes the auto-initializer to locate and load a version of the Windows App SDK version that's most appropriate for your app. -->
+    <!--<WindowsPackageType>MSIX</WindowsPackageType>-->
+    <!--<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>-->
+
+    <!-- false (for an unpackaged app), or absent (for a packaged app) -->
+    <!--<AppxPackage>false</AppxPackage>-->
   </PropertyGroup>
 
   <ItemGroup>
