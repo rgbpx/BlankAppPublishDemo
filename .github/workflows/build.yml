@@ -33,6 +33,7 @@ jobs:
           cache:                  true
           cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
           dotnet-version:         ${{ env.DOTNET_VERSION }}
+          global-json-file:       ./global.json
 
       - name: Restore .NET dependencies
         run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
@@ -76,6 +77,7 @@ jobs:
           cache:                  true
           cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
           dotnet-version:         ${{ env.DOTNET_VERSION }}
+          global-json-file:       ./global.json
 
       - name: Restore .NET dependencies
         run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
