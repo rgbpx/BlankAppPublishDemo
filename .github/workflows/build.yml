@@ -11,7 +11,7 @@ on:
     tags-ignore: ['*']
 
 env:
-  DOTNET_VERSION:     8.0.18
+  DOTNET_VERSION:     8.0.412
   DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
 
 jobs:
