@@ -36,6 +36,18 @@ jobs:
         working-directory: ./${{ github.event.repository.name }}
         run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
+      - name: Import base64 Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        run: echo "${{ secrets.CERT_BASE64_CONTENT }}" > cert.asc
+
+      - name: Decode Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        run: certutil -decode cert.asc cert.pfx
+
+      - name: Install Signing Certficiate
+        working-directory: ./${{ github.event.repository.name }}
+        run: certutil -user -p ${{ secrets.CERT_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
+
       - name: Run .NET build
         working-directory: ./${{ github.event.repository.name }}
         run:  dotnet build ./${{ github.event.repository.name }}.csproj `
@@ -47,7 +59,9 @@ jobs:
                 /p:AppxBundle=Always `
                 /p:UapAppxPackageBuildMode=CI `
                 /p:SelfContained=true `
-                /p:GenerateAppxPackageOnBuild=true
+                /p:GenerateAppxPackageOnBuild=true `
+                /p:AppxPackageSigningEnabled=true `
+                /p:PackageCertificateThumbprint=${{ secrets.CERT_THUMBPRINT }}
 
   build-unpackaged-jit:
     name: Unpackaged JIT build
