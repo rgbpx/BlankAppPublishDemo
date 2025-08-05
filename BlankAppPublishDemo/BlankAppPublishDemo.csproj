@@ -14,41 +14,16 @@
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <Configuration>Release</Configuration>
     <Nullable>enable</Nullable>
-
-
+    <UseWinUI>true</UseWinUI>
+    <!-- Required for WinUI project (both un/packaged) -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <!-- Both (both un/packaged) can be trimmed -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
     <!-- Hide WebView trimming warning in the builds -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
-
-    <!-- MSIX -->
-    <!-- https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/project-properties -->
-    <!-- https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/deploy-packaged-apps -->
-    <!-- https://github.com/microsoft/WindowsAppSDK-Samples/tree/main/Samples/DeploymentManager -->
-    <!-- https://learn.microsoft.com/en-us/windows/uwp/packaging/auto-build-package-uwp-apps -->
-
-    <!-- true (to enable), or absent (to disable) -->
-    <!--<EnableMsixTooling>true</EnableMsixTooling>-->
-
-    <!-- true, or absent (for false) -->
-    <!--<UseWinUI>true</UseWinUI>-->
-
-    <!-- true, or absent (for false) - Determines whether or not an app is deployed self-contained. -->
-    <!--<WindowsAppSdkSelfContained>true</WindowsAppSdkSelfContained>-->
-    <!--<SelfContained>true</SelfContained>-->
-
-    <!--<TrimMode>partial</TrimMode>-->
-    <!--<PublishTrimmed>true</PublishTrim-->
-    <!--<PublishReadyToRun>true</PublishReadyToRun>-->
-    <!--<PublishSingleFile>false</PublishSingleFile>-->
-
-    <!--<WindowsAppSdkBootstrapInitialize>true</WindowsAppSdkBootstrapInitialize>-->
-
-    <!-- None, or absent (to disable the auto-initializer) -->
-    <!-- for an unpackaged app causes the auto-initializer to locate and load a version of the Windows App SDK version that's most appropriate for your app. -->
-    <!--<WindowsPackageType>MSIX</WindowsPackageType>-->
-    <!--<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>-->
-
-    <!-- false (for an unpackaged app), or absent (for a packaged app) -->
-    <!--<AppxPackage>false</AppxPackage>-->
+    <!-- Both (both un/packaged) support R2R (AOT compiled alongside JIT as a fallback) -->
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
@@ -88,14 +63,6 @@
   -->
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
-
-  <!-- Publish Properties -->
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
   </PropertyGroup>
 
   <!-- Remove debugging files from final Release build -->
