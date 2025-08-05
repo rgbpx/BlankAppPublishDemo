@@ -46,6 +46,7 @@ jobs:
                 /p:WindowsPackageType=MSIX `
                 /p:AppxBundle=Always `
                 /p:UapAppxPackageBuildMode=CI `
+                /p:SelfContained=true `
                 /p:GenerateAppxPackageOnBuild=true
 
   build-unpackaged-jit:
