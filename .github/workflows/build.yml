@@ -28,17 +28,18 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # cache:                  true
-          # cache-dependency-path:  ./${{ github.event.repository.name }}/packages.lock.json
+          cache:                  true
+          cache-dependency-path:  ./${{ github.event.repository.name }}/packages.lock.json
           dotnet-version:         ${{ env.DOTNET_VERSION }}
 
-      # - name: Restore .NET dependencies
-      #   working-directory: ./${{ github.event.repository.name }}
-      #   run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+      - name: Restore .NET dependencies
+        working-directory: ./${{ github.event.repository.name }}
+        run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
       - name: Run .NET build
         working-directory: ./${{ github.event.repository.name }}
         run:  dotnet build ./${{ github.event.repository.name }}.csproj `
+                --no-restore `
                 /p:PlatformTarget=${{ matrix.arch }} `
                 /p:AppxBundlePlatforms=${{ matrix.arch }} `
                 /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `

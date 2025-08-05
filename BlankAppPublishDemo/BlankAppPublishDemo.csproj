@@ -18,8 +18,8 @@
     <!-- Required for WinUI project (both un/packaged) -->
     <EnableMsixTooling>true</EnableMsixTooling>
     <!-- Both (both un/packaged) can be trimmed -->
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
+    <!--<PublishTrimmed>true</PublishTrimmed>-->
+    <!--<TrimMode>partial</TrimMode>-->
     <!-- Hide WebView trimming warning in the builds -->
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <!-- Both (both un/packaged) support R2R (AOT compiled alongside JIT as a fallback) -->
