@@ -127,7 +127,7 @@ jobs:
       - name: Create Pull Request
         env:
           # No permissions?
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         run: gh pr create --base main --head version/${{ steps.ms-version.outputs.new_version }} --title "Version files ${{ steps.ms-version.outputs.new_version }}" --body "Bump version in files to ${{ steps.ms-version.outputs.new_version }}"
@@ -135,7 +135,7 @@ jobs:
       - name: Merge Pull Request
         env:
           # No permissions?
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         run: gh pr merge version/${{ steps.ms-version.outputs.new_version }} --merge --delete-branch
