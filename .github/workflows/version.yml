@@ -159,5 +159,5 @@ jobs:
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
         run: |
-          tag=${{ steps.bump-semver.outputs.new_version }}
+          tag=${{ steps.ms-version.outputs.new_version }}
           git push origin "${tag}"
