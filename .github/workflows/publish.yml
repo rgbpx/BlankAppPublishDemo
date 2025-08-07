@@ -5,128 +5,127 @@ name: Publish
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*.*'
 
 permissions:
   contents: write
 
 env:
-  DOTNET_VERSION:     '8.0.x'
-  DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
+  DOTNET_VERSION:     8.0.x
+  DOTNET_LOCK_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
 
 jobs:
-  build-jit:
-    name: JIT build
+  build-packaged-jit:
+    name: Packaged JIT build (${{ matrix.arch }})
     runs-on: windows-latest
     strategy:
       matrix:
-        os: [win]
-        arch: [x86, x64, arm64]
-        mode: [jit]
-        single-file: [false, true]
+        arch: [x64]
     env:
-      BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
-      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}${{ matrix.single-file && '-single-file' || '' }}
+      OS: win
+      PROJECT_TYPE: packaged
     steps:
+      - name: Extract version
+        id: extract-version
+        shell: pwsh
+        if: github.ref_type == "tag"
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace "^v", ""
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Construct release name
+        id: release-name
+        shell: pwsh
+        if: ${{ steps.extract-version.outputs.version != "" }}
+        run: |
+          $project_name = ${{ github.event.repository.name }}
+          $project_version = ${{ steps.extract-version.outputs.version }}
+
+          # AppName-1.0.0.0-packaged-win-x64
+          $build_name = "$project_name-$project_version-{{ env.PROJECT_TYPE }}-{{ env.OS }}-${{ matrix.arch }}"
+          echo "build_name=$build_name" >> $env:GITHUB_OUTPUT
+
+          # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64
+          $build_path = "${{ github.workspace }}/$project_name/bin/$build_name"
+          echo "build_path=$build_path" >> $env:GITHUB_OUTPUT
+
+          # AppName_1.0.0.0
+          $appx_base    = "$project_name_$project_version"
+          # AppName_1.0.0.0_Test
+          $appx_folder  = "$appx_base_Test"
+          # AppName_1.0.0.0_x64
+          $appx_name    = "$project_base_${{ matrix.arch }}"
+          # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64/AppName_1.0.0.0_Test/AppName_1.0.0.0_x64.cer
+          $appx_cert_path    = "$build_path/$appx_folder/$appx_name.cer"
+          # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64/AppName_1.0.0.0_Test/AppName_1.0.0.0_x64.msix
+          $appx_build_path    = "$build_path/$appx_folder/$appx_name.msix"
+
+          echo "appx_cert_path=$appx_cert_path" >> $env:GITHUB_OUTPUT
+          echo "appx_build_path=$appx_build_path" >> $env:GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Import base64 Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: echo "${{ secrets.CERT_BASE64_CONTENT }}" > cert.asc
+
+      - name: Decode Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: certutil -decode cert.asc cert.pfx
+
+      - name: Install Signing Certficiate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: certutil -user -p ${{ secrets.CERT_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           cache:                  true
-          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          cache-dependency-path:  ${{ env.DOTNET_LOCK_PATH }}
           dotnet-version:         ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
-        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+      - name: Restore .NET dependencies
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet restore "./${{ github.event.repository.name }}.csproj" --locked-mode --force-evaluate
 
-      - name: Dotnet build
-        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              --no-restore `
-              /p:PublishDir=${{ env.BUILD_PATH }} `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:PublishSingleFile=${{ matrix.single-file }}
+      - name: Build app
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        if: ${{ steps.release-name.outputs.build_path != "" }}
+        run:  dotnet publish ./${{ github.event.repository.name }}.csproj `
+                --no-restore `
+                /p:AppxPackageDir="${{ steps.release-name.outputs.build_path }}" `
+                /p:PlatformTarget=${{ matrix.arch }} `
+                /p:AppxBundlePlatforms=${{ matrix.arch }} `
+                /p:RuntimeIdentifier={{ env.OS }}-${{ matrix.arch }} `
+                /p:WindowsPackageType=MSIX `
+                /p:AppxBundle=Always `
+                /p:UapAppxPackageBuildMode=CI `
+                /p:SelfContained=true `
+                /p:GenerateAppxPackageOnBuild=true `
+                /p:AppxPackageSigningEnabled=true `
+                /p:PackageCertificateThumbprint=${{ secrets.CERT_THUMBPRINT }}
 
-        # Workaround for: https://github.com/actions/download-artifact/issues/374
-      - name: Archive build result
-        run: Compress-Archive `
-              -Path ${{ env.BUILD_PATH }} `
-              -DestinationPath "${{ env.BUILD_PATH }}.zip"
-
-      - name: Upload build archive
+      - name: Upload app certificate
         uses: actions/upload-artifact@v4
         with:
-          name:               ${{ env.BUILD_NAME }}
-          path:               "${{ env.BUILD_PATH }}.zip"
+          name:               ${{ steps.release-name.outputs.build_name }}-certificate
+          path:               ${{ steps.release-name.outputs.appx_cert_path }}
           if-no-files-found:  error
           compression-level:  0 # since only transferring between the jobs
           overwrite:          true
 
-  build-aot:
-    name: AOT build (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.optimization }})
-    strategy:
-      matrix:
-        include:
-          - runner:       windows-latest
-            arch:         x64
-            os:           win
-            mode:         aot
-            optimization: speed
-          - runner:       windows-latest
-            arch:         x64
-            os:           win
-            mode:         aot
-            optimization: size
-          - runner:       windows-11-arm
-            arch:         arm64
-            os:           win
-            mode:         aot
-            optimization: speed
-          - runner:       windows-11-arm
-            arch:         arm64
-            os:           win
-            mode:         aot
-            optimization: size
-    runs-on: ${{ matrix.runner }}
-    env:
-      BUILD_NAME: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
-      BUILD_PATH: ${{ github.workspace }}/${{ github.event.repository.name }}/bin/${{ github.event.repository.name }}-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.mode }}-${{ matrix.optimization }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          cache:                  true
-          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
-          dotnet-version:         ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
-
-      - name: Dotnet build
-        run: dotnet publish ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
-              --no-restore `
-              /p:PublishDir=${{ env.BUILD_PATH }} `
-              /p:PlatformTarget=${{ matrix.arch }} `
-              /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
-              /p:OptimizationPreference=${{ matrix.optimization }} `
-              /p:PublishAot=true
-
-        # Workaround for: https://github.com/actions/download-artifact/issues/374
-      - name: Archive build result
-        run: Compress-Archive `
-              -Path ${{ env.BUILD_PATH }} `
-              -DestinationPath "${{ env.BUILD_PATH }}.zip"
-
-      - name: Upload build archive
+      - name: Upload MSIX build
         uses: actions/upload-artifact@v4
         with:
-          name:               ${{ env.BUILD_NAME }}
-          path:               "${{ env.BUILD_PATH }}.zip"
+          name:               ${{ steps.release-name.outputs.build_name }}-build
+          path:               ${{ steps.release-name.outputs.appx_build_path }}
           if-no-files-found:  error
           compression-level:  0 # since only transferring between the jobs
           overwrite:          true
@@ -134,7 +133,8 @@ jobs:
   publish-github:
     name: Publish GitHub release
     runs-on: windows-latest
-    needs: [build-jit, build-aot]
+    #needs: [build-jit, build-aot]
+    needs: [build-packaged-jit]
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -146,7 +146,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          files: ./artifacts/**/${{ github.event.repository.name }}-*.zip
+          files: ./artifacts/**/${{ github.event.repository.name }}-*
           fail_on_unmatched_files: true
           generate_release_notes: true
           make_latest: true
