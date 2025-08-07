@@ -1,4 +1,4 @@
-name: Update vrsion
+name: Update version
 
 on:
   push:
@@ -69,7 +69,7 @@ jobs:
         id: ms-version
         if: ${{ steps.bump-semver.outputs.new_version != null }}
         shell: bash
-        run: echo "new_version=${{ steps.bump-semver.outputs.new_version }}.0" >> GITHUB_OUTPUT
+        run: echo "new_version=${{ steps.bump-semver.outputs.new_version }}.0" >> $GITHUB_OUTPUT
 
       - name: Import GPG key
         id: import-gpg
@@ -122,7 +122,7 @@ jobs:
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
-        run: git push -u origin version
+        run: git push -u origin version/${{ steps.ms-version.outputs.new_version }}
 
       - name: Create Pull Request
         env:
@@ -132,7 +132,7 @@ jobs:
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         run: gh pr create \
             --base main \
-            --head version \
+            --head version/${{ steps.ms-version.outputs.new_version }} \
             --title "Version files ${{ steps.ms-version.outputs.new_version }}" \
             --body "Bump version in manifest files and in version file to ${{ steps.ms-version.outputs.new_version }}"
             
