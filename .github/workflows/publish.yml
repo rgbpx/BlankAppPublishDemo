@@ -37,7 +37,7 @@ jobs:
       - name: Construct release name
         id: release-name
         shell: pwsh
-        if: ${{ steps.extract-version.outputs.version != "" }}
+        if: ${{ steps.extract-version.outputs.version != '' }}
         run: |
           $project_name = ${{ github.event.repository.name }}
           $project_version = ${{ steps.extract-version.outputs.version }}
@@ -97,7 +97,7 @@ jobs:
       - name: Build app
         working-directory: ./${{ github.event.repository.name }}
         shell: pwsh
-        if: ${{ steps.release-name.outputs.build_path != "" }}
+        if: ${{ steps.release-name.outputs.build_path != '' }}
         run:  dotnet publish ./${{ github.event.repository.name }}.csproj `
                 --no-restore `
                 /p:AppxPackageDir="${{ steps.release-name.outputs.build_path }}" `
