@@ -28,7 +28,7 @@ jobs:
       - name: Extract version
         id: extract-version
         shell: pwsh
-        if: github.ref_type == "tag"
+        if: github.ref_type == 'tag'
         run: |
           $tag = "${{ github.ref_name }}"
           $version = $tag -replace "^v", ""
