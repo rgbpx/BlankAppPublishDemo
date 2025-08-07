@@ -8,34 +8,33 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="aa7a58e0-9bd8-4f24-b408-3183b4766fff"
-    Publisher="CN=username"
+    Name="rgbpx.BlankAppPublishDemo"
+    Publisher="CN=rgbpx Software, O=rgbpx Corporation, C=RU"
     Version="1.0.0.0" />
-
-  <mp:PhoneIdentity PhoneProductId="aa7a58e0-9bd8-4f24-b408-3183b4766fff" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>BlankAppPublishDemo</DisplayName>
-    <PublisherDisplayName>username</PublisherDisplayName>
+    <PublisherDisplayName>rgbpx</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
   </Dependencies>
 
   <Resources>
+    <!-- Embeds: Strings/en-US/Resources.resw -->
+    <!-- The language script folders after building .msix is for installer only (this option is not responsible for them) -->
     <Resource Language="x-generate"/>
   </Resources>
 
   <Applications>
-    <Application Id="App"
+    <Application Id="rgbpx.BlankAppPublishDemo"
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="BlankAppPublishDemo"
-        Description="BlankAppPublishDemo"
+        Description="Blank app publish demo"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
@@ -46,6 +45,7 @@
   </Applications>
 
   <Capabilities>
+    <!-- Required for WinUI 3 (do not change) -->
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

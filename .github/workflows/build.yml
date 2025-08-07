@@ -2,21 +2,75 @@
 
 name: Build
 
-# Run only on commit push event to any branch except main and ignore tag pushes
 on:
   push:
-    # run on every branch except main
-    branches-ignore: [main]
-    # but never run on tag‐only pushes
-    tags-ignore: ['*']
+    branches-ignore: 
+      - main            # do not run on pushed commits to main
+      - version/**      # do not run on pushed commits to version branches
+    tags-ignore:
+      - '*'             # do not run on pushed tags
 
 env:
-  DOTNET_VERSION:     '8.0.x'
-  DOTNET_CACHE_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
+  DOTNET_VERSION:     8.0.x
+  DOTNET_LOCK_PATH:  './${{ github.event.repository.name }}/packages.lock.json'
 
 jobs:
-  build-jit:
-    name: JIT build
+  build-packaged-jit:
+    name: Packaged JIT build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [win]
+        arch: [x86, x64, arm64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          cache:                  true
+          cache-dependency-path:  ${{ env.DOTNET_LOCK_PATH }}
+          dotnet-version:         ${{ env.DOTNET_VERSION }}
+
+      - name: Restore .NET dependencies
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+
+      - name: Import base64 Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: echo "${{ secrets.CERT_BASE64_CONTENT }}" > cert.asc
+
+      - name: Decode Signing Certificate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: certutil -decode cert.asc cert.pfx
+
+      - name: Install Signing Certficiate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run: certutil -user -p ${{ secrets.CERT_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
+
+      - name: Run .NET build
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet build ./${{ github.event.repository.name }}.csproj `
+                --no-restore `
+                /p:PlatformTarget=${{ matrix.arch }} `
+                /p:AppxBundlePlatforms=${{ matrix.arch }} `
+                /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+                /p:WindowsPackageType=MSIX `
+                /p:AppxBundle=Always `
+                /p:UapAppxPackageBuildMode=CI `
+                /p:SelfContained=true `
+                /p:GenerateAppxPackageOnBuild=true `
+                /p:AppxPackageSigningEnabled=true `
+                /p:PackageCertificateThumbprint=${{ secrets.CERT_THUMBPRINT }}
+
+  build-unpackaged-jit:
+    name: Unpackaged JIT build
     runs-on: windows-latest
     strategy:
       matrix:
@@ -31,21 +85,29 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           cache:                  true
-          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          cache-dependency-path:  ${{ env.DOTNET_LOCK_PATH }}
           dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore .NET dependencies
-        run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
       - name: Run .NET build
-        run:  dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet build ./${{ github.event.repository.name }}.csproj `
                 --no-restore `
                 /p:PlatformTarget=${{ matrix.arch }} `
                 /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+                /p:WindowsPackageType=None `
+                /p:WindowsAppSdkSelfContained=true `
+                /p:SelfContained=true `
                 /p:PublishSingleFile=${{ matrix.single-file }}
+                /p:EnableCompressionInSingleFile=${{ matrix.single-file }}
 
-  build-aot:
-    name: AOT build (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.optimization }})
+  build-unpackaged-aot:
+    name: Unpackaged AOT build (${{ matrix.os }}, ${{ matrix.arch }}, ${{ matrix.optimization }})
     strategy:
       matrix:
         include:
@@ -74,16 +136,23 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           cache:                  true
-          cache-dependency-path:  ${{ env.DOTNET_CACHE_PATH }}
+          cache-dependency-path:  ${{ env.DOTNET_LOCK_PATH }}
           dotnet-version:         ${{ env.DOTNET_VERSION }}
 
       - name: Restore .NET dependencies
-        run:  dotnet restore './${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet restore './${{ github.event.repository.name }}.csproj' --locked-mode --force-evaluate
 
       - name: Run .NET build
-        run:  dotnet build ${{ github.workspace }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj `
+        working-directory: ./${{ github.event.repository.name }}
+        shell: pwsh
+        run:  dotnet build ./${{ github.event.repository.name }}.csproj `
                 --no-restore `
                 /p:PlatformTarget=${{ matrix.arch }} `
                 /p:RuntimeIdentifier=${{ matrix.os }}-${{ matrix.arch }} `
+                /p:WindowsPackageType=None `
+                /p:WindowsAppSdkSelfContained=true `
+                /p:SelfContained=true `
                 /p:OptimizationPreference=${{ matrix.optimization }} `
                 /p:PublishAot=true
