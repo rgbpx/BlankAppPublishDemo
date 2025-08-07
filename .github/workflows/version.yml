@@ -122,7 +122,8 @@ jobs:
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
-        run: git push -u origin version/${{ steps.ms-version.outputs.new_version }}
+        run: |
+          git push -u origin version/${{ steps.ms-version.outputs.new_version }}
 
       - name: Create Pull Request
         env:
