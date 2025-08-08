@@ -1,0 +1,60 @@
+name: Version tag
+
+on:
+  push:
+    tags-ignore:
+      - '*'             # do not run on pushed tags
+    branches: 
+      - main            # only run on push to main
+    paths:
+      - 'version'       # only run when version file is updated
+      - '!version/**'   # ignore version directory
+
+permissions:
+  contents: write
+
+jobs:
+  version-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Import GPG key
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          git_user_signingkey: true
+          git_tag_gpgsign: true
+
+      - name: Setup git credentials
+        shell: bash
+        run: |
+          git config user.email "${{ secrets.USER_EMAIL }}"
+          git config user.name "${{ secrets.USER_NAME }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Read version file
+        id: read-version
+        shell: bash
+        run: |
+          new_version=$(cat version)
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Create new version tag
+        shell: bash
+        run: |
+          tag=${{ steps.read-version.outputs.new_version }}
+          keyid=${{ steps.import-gpg.outputs.keyid }}
+          git tag -u ${keyid} "${tag}" -m "Release ${tag}"
+
+      - name: Push tag
+        shell: bash
+        run: |
+          tag=${{ steps.read-version.outputs.new_version }}
+          git push origin "${tag}"

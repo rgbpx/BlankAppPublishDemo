@@ -1,4 +1,4 @@
-name: Update version
+name: Version files
 
 on:
   push:
@@ -6,12 +6,14 @@ on:
       - main
     tags-ignore:
       - '*'             # do not run on pushed tags
+    paths:
+      - '!version'      # ignore commits with changes to version file (prevent self trigger)
 
 permissions:
   contents: write
 
 jobs:
-  update-version:
+  version-files:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,11 +51,23 @@ jobs:
         if: ${{ steps.release-label.outputs.level != null }}
         uses: actions-ecosystem/action-get-latest-tag@v1
         with:
-          # Generate initial semver tag if none is found (v0.0.0)
+          # Generate initial semver tag if none is found (v0.0.0.0)
           with_initial_version: true
-          initial_version: 'v0.0.0'
+          initial_version: 'v0.0.0.0'
           # Get only semver tag (with prefix 'v'')
           semver_only: true
+
+      # Convert tag from Microsoft version format to SemVer
+      - name: Get current semver tag
+        id: get-latest-semver-tag
+        run: |
+          tag=${{ steps.get-latest-tag.outputs.tag }}
+
+          if [[ $(grep -o '\.' <<< "$tag" | wc -l) -eq 3 ]]; then
+              tag="${tag%.*}"
+          fi
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
 
       # bump semver tag
       - name: Get new version 
@@ -62,7 +76,7 @@ jobs:
         # Continue only with semver level target from pull request
         if: ${{ steps.release-label.outputs.level != null }}
         with:
-          current_version: ${{ steps.get-latest-tag.outputs.tag }}
+          current_version: ${{ steps.get-latest-semver-tag.outputs.tag }}
           level: ${{ steps.release-label.outputs.level }}
 
       - name: Convert SemVer to Microsoft version format
@@ -81,7 +95,6 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
-          # git_push_gpgsign: true
 
       - name: Setup git credentials
         # Continue only with new semver tag and gpg key
@@ -103,8 +116,7 @@ jobs:
         shell: bash
         run: echo "${{ steps.ms-version.outputs.new_version }}" > version
 
-      # Update manifest files
-      # TODO
+      # TODO: Update manifest files
 
       - name: Stage all files
         # Continue only with new semver tag and gpg key
@@ -124,6 +136,7 @@ jobs:
         shell: bash
         run: git push -u origin version/${{ steps.ms-version.outputs.new_version }}
 
+      # TODO: add version-files label?
       - name: Create Pull Request
         env:
           # No permissions?
@@ -131,28 +144,3 @@ jobs:
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         run: gh pr create --base main --head version/${{ steps.ms-version.outputs.new_version }} --title "Version files ${{ steps.ms-version.outputs.new_version }}" --body "Bump version in files to ${{ steps.ms-version.outputs.new_version }}"
-            
-      - name: Merge Pull Request
-        env:
-          # No permissions?
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-        # Continue only with new semver tag and gpg key
-        if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
-        run: gh pr merge version/${{ steps.ms-version.outputs.new_version }} --merge --delete-branch
-
-      - name: Create new version tag
-        # Continue only with new semver tag and gpg key
-        if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
-        shell: bash
-        run: |
-          tag=${{ steps.ms-version.outputs.new_version }}
-          keyid=${{ steps.import-gpg.outputs.keyid }}
-          git tag -u ${keyid} "${tag}" -m "Release ${tag}"
-
-      - name: Push tag
-        # Continue only with new semver tag and gpg key
-        if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
-        shell: bash
-        run: |
-          tag=${{ steps.ms-version.outputs.new_version }}
-          git push origin "${tag}"
