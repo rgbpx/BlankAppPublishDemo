@@ -10,7 +10,7 @@ on:
       - main
     paths:
       - '*'
-      - '!./version'      # ignore commits with changes to version file (prevent self trigger)
+      - '!version'      # ignore commits with changes to version file (prevent self trigger)
 
 permissions:
   contents: write
