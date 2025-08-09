@@ -39,25 +39,25 @@ jobs:
         shell: pwsh
         if: ${{ steps.extract-version.outputs.version != '' }}
         run: |
-          $project_name = ${{ github.event.repository.name }}
-          $project_version = ${{ steps.extract-version.outputs.version }}
+          $project_name       = "${{ github.event.repository.name }}"
+          $project_version    = "${{ steps.extract-version.outputs.version }}"
 
           # AppName-1.0.0.0-packaged-win-x64
-          $build_name = "$project_name-$project_version-{{ env.PROJECT_TYPE }}-{{ env.OS }}-${{ matrix.arch }}"
+          $build_name         = "$project_name-$project_version-{{ env.PROJECT_TYPE }}-{{ env.OS }}-${{ matrix.arch }}"
           echo "build_name=$build_name" >> $env:GITHUB_OUTPUT
 
           # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64
-          $build_path = "${{ github.workspace }}/$project_name/bin/$build_name"
+          $build_path         = "${{ github.workspace }}/$project_name/bin/$build_name"
           echo "build_path=$build_path" >> $env:GITHUB_OUTPUT
 
           # AppName_1.0.0.0
-          $appx_base    = "$project_name_$project_version"
+          $appx_base          = "$project_name_$project_version"
           # AppName_1.0.0.0_Test
-          $appx_folder  = "$appx_base_Test"
+          $appx_folder        = "$appx_base_Test"
           # AppName_1.0.0.0_x64
-          $appx_name    = "$project_base_${{ matrix.arch }}"
+          $appx_name          = "$project_base_${{ matrix.arch }}"
           # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64/AppName_1.0.0.0_Test/AppName_1.0.0.0_x64.cer
-          $appx_cert_path    = "$build_path/$appx_folder/$appx_name.cer"
+          $appx_cert_path     = "$build_path/$appx_folder/$appx_name.cer"
           # .../AppName/AppName/bin/AppName-1.0.0.0-packaged-win-x64/AppName_1.0.0.0_Test/AppName_1.0.0.0_x64.msix
           $appx_build_path    = "$build_path/$appx_folder/$appx_name.msix"
 
