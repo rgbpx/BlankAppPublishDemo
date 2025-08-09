@@ -7,7 +7,7 @@ on:
     branches: 
       - main            # only run on push to main
     paths:
-      - './version'     # only run when version file is updated
+      - 'version'     # only run when version file is updated
 
 permissions:
   contents: write
