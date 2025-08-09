@@ -1,14 +1,13 @@
-﻿# Perform .NET build on every commit push event to any branch except main
+﻿# Builds app on every push commit to any branch except main
 
 name: Build
 
 on:
   push:
-    branches-ignore: 
-      - main            # do not run on pushed commits to main
-      # - version/**      # do not run on pushed commits to version branches
     tags-ignore:
       - '*'             # do not run on pushed tags
+    branches-ignore: 
+      - main            # do not run on pushed commits to main
 
 env:
   DOTNET_VERSION:     8.0.x

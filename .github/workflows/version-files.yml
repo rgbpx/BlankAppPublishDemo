@@ -1,13 +1,15 @@
+# Versions files and creates a PR on every push commit to main if merged PR had version labels
+
 name: Version files
 
 on:
   push:
+    tags-ignore:
+      - '*'               # do not run on pushed tags
     branches: 
       - main
-    tags-ignore:
-      - '*'             # do not run on pushed tags
     paths:
-      - '!version'      # ignore commits with changes to version file (prevent self trigger)
+      - '!./version'      # ignore commits with changes to version file (prevent self trigger)
 
 permissions:
   contents: write
@@ -15,6 +17,9 @@ permissions:
 jobs:
   version-files:
     runs-on: ubuntu-latest
+
+    env:
+      BRANCH_PREFIX: 'version/'
 
     steps:
       - name: Get merged PR
@@ -108,7 +113,7 @@ jobs:
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
-        run: git checkout -b version/${{ steps.ms-version.outputs.new_version }}          
+        run: git checkout -b ${{ env.BRANCH_PREFIX }}${{ steps.ms-version.outputs.new_version }}          
 
       - name: Update/Create version file
         # Continue only with new semver tag and gpg key
@@ -134,7 +139,7 @@ jobs:
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
         shell: bash
-        run: git push -u origin version/${{ steps.ms-version.outputs.new_version }}
+        run: git push -u origin ${{ env.BRANCH_PREFIX }}${{ steps.ms-version.outputs.new_version }}
 
       # TODO: add version-files label?
       - name: Create Pull Request
@@ -143,4 +148,4 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         # Continue only with new semver tag and gpg key
         if: ${{ steps.ms-version.outputs.new_version != null && steps.import-gpg.outputs.keyid != null }}
-        run: gh pr create --base main --head version/${{ steps.ms-version.outputs.new_version }} --title "Version files ${{ steps.ms-version.outputs.new_version }}" --body "Bump version in files to ${{ steps.ms-version.outputs.new_version }}"
+        run: gh pr create --base main --head ${{ env.BRANCH_PREFIX }}${{ steps.ms-version.outputs.new_version }} --title "Version files ${{ steps.ms-version.outputs.new_version }}" --body "Bump version in files to ${{ steps.ms-version.outputs.new_version }}"
