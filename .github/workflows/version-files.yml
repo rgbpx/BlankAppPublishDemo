@@ -8,8 +8,9 @@ on:
       - '*'               # do not run on pushed tags
     branches: 
       - main
-    #paths:
-    #  - '!./version'      # ignore commits with changes to version file (prevent self trigger)
+    paths:
+      - '*'
+      - '!./version'      # ignore commits with changes to version file (prevent self trigger)
 
 permissions:
   contents: write
